@@ -173,6 +173,7 @@ export default function Globe() {
     let destroyed = false
     let raf = -1
     let stopTimer = -1 as unknown as ReturnType<typeof setTimeout>
+    let removeListener = () => {}
 
     import('globe.gl').then(({ default: GlobeGL }) => {
       if (destroyed || !mountRef.current) return
@@ -206,6 +207,22 @@ export default function Globe() {
         .width(mountRef.current!.clientWidth)
         .height(mountRef.current!.clientHeight)
 
+      // ── Point de vue initial centré sur le monde ───────────────────────
+      const isMobile = window.innerWidth < 640
+      globe.pointOfView({ lat: 12, lng: 18, altitude: isMobile ? 3.25 : 2.25 }, 0)
+
+      // ── Resize handler (orientation mobile, redimensionnement) ─────────
+      const handleResize = () => {
+        if (!mountRef.current || destroyed) return
+        const mobile = window.innerWidth < 640
+        globe
+          .width(mountRef.current.clientWidth)
+          .height(mountRef.current.clientHeight)
+          .pointOfView({ lat: 12, lng: 18, altitude: mobile ? 3.25 : 2.25 }, 0)
+      }
+      window.addEventListener('resize', handleResize)
+      window.visualViewport?.addEventListener('resize', handleResize)
+
       // Tourne doucement à l'ouverture, s'arrête après 3s
       globe.controls().autoRotate = true
       globe.controls().autoRotateSpeed = 0.4
@@ -213,6 +230,14 @@ export default function Globe() {
         if (!destroyed) globe.controls().autoRotate = false
       }, 3000)
       globeRef.current = globe
+
+      // Cleanup resize listeners
+      const prevRemoveListener = removeListener
+      removeListener = () => {
+        prevRemoveListener()
+        window.removeEventListener('resize', handleResize)
+        window.visualViewport?.removeEventListener('resize', handleResize)
+      }
 
       // ── Label fading via RAF + pointOfView().altitude ──────────────────
       // altitude: ~2.5 default (far), ~0.1 very close
@@ -233,6 +258,7 @@ export default function Globe() {
 
     return () => {
       destroyed = true
+      removeListener()
       clearTimeout(stopTimer)
       cancelAnimationFrame(raf)
       globeRef.current = null
