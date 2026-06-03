@@ -197,4 +197,63 @@ export const COUNTRIES: Country[] = [
   { code: 'YE', name: 'Yémen', lat: 15.55, lng: 48.52 },
   { code: 'ZM', name: 'Zambie', lat: -13.13, lng: 27.85 },
   { code: 'ZW', name: 'Zimbabwe', lat: -19.02, lng: 29.15 },
+
+  // ── Territoires français d'outre-mer ──────────────────────────────────────
+  { code: 'MQ', name: 'Martinique',             lat: 14.66,  lng: -61.02  },
+  { code: 'GP', name: 'Guadeloupe',             lat: 16.27,  lng: -61.58  },
+  { code: 'RE', name: 'La Réunion',             lat: -21.11, lng: 55.54   },
+  { code: 'YT', name: 'Mayotte',                lat: -12.83, lng: 45.17   },
+  { code: 'GF', name: 'Guyane française',       lat: 4.00,   lng: -53.00  },
+  { code: 'MF', name: 'Saint-Martin',           lat: 18.08,  lng: -63.05  },
+  { code: 'BL', name: 'Saint-Barthélemy',       lat: 17.90,  lng: -62.83  },
+  { code: 'PF', name: 'Polynésie française',    lat: -17.68, lng: -149.41 },
+  { code: 'NC', name: 'Nouvelle-Calédonie',     lat: -20.90, lng: 165.62  },
+  { code: 'PM', name: 'Saint-Pierre-et-Miquelon', lat: 46.88, lng: -56.32 },
+  { code: 'WF', name: 'Wallis-et-Futuna',       lat: -13.77, lng: -177.16 },
+
+  // ── Caraïbes & Antilles ───────────────────────────────────────────────────
+  { code: 'PR', name: 'Puerto Rico',            lat: 18.22,  lng: -66.59  },
+  { code: 'CW', name: 'Curaçao',                lat: 12.17,  lng: -68.99  },
+  { code: 'AW', name: 'Aruba',                  lat: 12.52,  lng: -69.97  },
+  { code: 'SX', name: 'Sint Maarten',           lat: 18.03,  lng: -63.06  },
+  { code: 'BQ', name: 'Bonaire',                lat: 12.18,  lng: -68.24  },
+  { code: 'VI', name: 'Îles Vierges américaines', lat: 18.34, lng: -64.90 },
+  { code: 'VG', name: 'Îles Vierges britanniques', lat: 18.42, lng: -64.64 },
+  { code: 'KY', name: 'Îles Caïmans',           lat: 19.31,  lng: -81.25  },
+  { code: 'TC', name: 'Îles Turques-et-Caïques', lat: 21.69, lng: -71.80  },
+  { code: 'AI', name: 'Anguilla',               lat: 18.22,  lng: -63.07  },
+  { code: 'MS', name: 'Montserrat',             lat: 16.74,  lng: -62.19  },
+  { code: 'BM', name: 'Bermudes',               lat: 32.32,  lng: -64.75  },
+
+  // ── Pacifique ─────────────────────────────────────────────────────────────
+  { code: 'AS', name: 'Samoa américaines',      lat: -14.27, lng: -170.13 },
+  { code: 'GU', name: 'Guam',                   lat: 13.44,  lng: 144.79  },
+  { code: 'MP', name: 'Îles Mariannes du Nord', lat: 15.10,  lng: 145.67  },
+  { code: 'CK', name: 'Îles Cook',              lat: -21.24, lng: -159.78 },
+  { code: 'NU', name: 'Niue',                   lat: -19.05, lng: -169.87 },
+  { code: 'TK', name: 'Tokelau',                lat: -9.17,  lng: -171.82 },
+  { code: 'NF', name: 'Île Norfolk',            lat: -29.04, lng: 167.96  },
+  { code: 'PN', name: 'Pitcairn',               lat: -25.07, lng: -130.10 },
+
+  // ── Europe — territoires & micro-États manquants ──────────────────────────
+  { code: 'XK', name: 'Kosovo',                 lat: 42.60,  lng: 20.90   },
+  { code: 'FO', name: 'Îles Féroé',             lat: 61.89,  lng: -6.91   },
+  { code: 'GL', name: 'Groenland',              lat: 71.71,  lng: -42.60  },
+  { code: 'GI', name: 'Gibraltar',              lat: 36.14,  lng: -5.35   },
+  { code: 'GG', name: 'Guernesey',              lat: 49.47,  lng: -2.59   },
+  { code: 'JE', name: 'Jersey',                 lat: 49.19,  lng: -2.09   },
+  { code: 'IM', name: 'Île de Man',             lat: 54.24,  lng: -4.55   },
+  { code: 'AX', name: 'Îles Åland',             lat: 60.18,  lng: 20.00   },
+  { code: 'SJ', name: 'Svalbard',               lat: 77.85,  lng: 20.95   },
+
+  // ── Asie & Océan Indien ───────────────────────────────────────────────────
+  { code: 'HK', name: 'Hong Kong',              lat: 22.32,  lng: 114.17  },
+  { code: 'MO', name: 'Macao',                  lat: 22.19,  lng: 113.54  },
+  { code: 'PS', name: 'Palestine',              lat: 31.95,  lng: 35.23   },
+  { code: 'SH', name: 'Sainte-Hélène',          lat: -15.96, lng: -5.72   },
+  { code: 'IO', name: 'Diego Garcia',           lat: -7.31,  lng: 72.41   },
+
+  // ── Afrique — territoires manquants ──────────────────────────────────────
+  { code: 'EH', name: 'Sahara occidental',      lat: 24.22,  lng: -12.89  },
+  { code: 'TF', name: 'Terres australes françaises', lat: -49.28, lng: 69.35 },
 ]
