@@ -23,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full">
-      <body className={`${dmSans.className} min-h-full flex flex-col`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+    <html lang="fr" className="h-full w-full">
+      <body className={`${dmSans.className} h-full flex flex-col`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
         <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(12,11,22,0.92)', backdropFilter: 'blur(14px)', borderColor: 'var(--border)' }}>
           <div className="max-w-6xl mx-auto px-3 h-14 flex items-center justify-between gap-2">
 
@@ -64,7 +64,7 @@ export default function RootLayout({
             </div>
           </div>
         </nav>
-        <div className="pt-14 flex-1 flex flex-col">{children}</div>
+        <div className="pt-14 flex-1 flex flex-col relative">{children}</div>
       </body>
     </html>
   );

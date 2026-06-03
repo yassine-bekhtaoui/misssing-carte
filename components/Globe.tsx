@@ -280,7 +280,7 @@ export default function Globe() {
 
   // ── JSX ────────────────────────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-full" style={{ background: 'var(--bg)' }}>
+    <div className="absolute inset-0" style={{ background: 'var(--bg)' }}>
       <div ref={mountRef} className="w-full h-full" />
 
       {loading && (
