@@ -376,7 +376,7 @@ export default function Globe() {
       </div>
 
       {/* ── Réseaux sociaux ──────────────────────────────────────────────── */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20" style={{ bottom: 'max(32px, env(safe-area-inset-bottom, 32px))' }}>
         <span className="text-xs mr-1 hidden sm:block" style={{ color: 'var(--muted2)', whiteSpace: 'nowrap' }}>Retrouvez-nous</span>
         {[
           {
@@ -432,8 +432,8 @@ export default function Globe() {
       {/* Engrenage admin */}
       <button
         onClick={() => router.push('/admin')}
-        className="absolute bottom-8 right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all z-20"
-        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)' }}
+        className="absolute right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all z-20"
+        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', bottom: 'max(32px, env(safe-area-inset-bottom, 32px))' }}
         title="Accès administration"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -572,5 +572,6 @@ export default function Globe() {
     </div>
   )
 }
+
 
 
