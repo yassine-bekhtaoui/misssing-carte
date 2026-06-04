@@ -34,10 +34,12 @@ async function spotifyFetch(path: string, token: string, init: RequestInit = {})
 
 async function spotifyError(res: Response, error: string) {
   const detail = await res.text().catch(() => '')
+  const retryAfter = res.headers.get('retry-after')
   return NextResponse.json(
     {
       error,
       status: res.status,
+      retryAfter: retryAfter ? Number(retryAfter) : null,
       detail: detail.slice(0, 500),
     },
     { status: res.status >= 400 && res.status < 600 ? res.status : 500 }
@@ -106,13 +108,8 @@ async function searchSpotifyTrack(token: string, artist: ExportArtist) {
   const queries = [
     deezerMeta?.isrc ? `isrc:${deezerMeta.isrc}` : '',
     `track:${deezerTitle} artist:${deezerArtist}`,
-    `${deezerTitle} ${deezerArtist}`,
-    `track:${deezerTitle}`,
-    deezerTitle,
-    `track:${artist.song_name} artist:${artist.name}`,
-    `${artist.song_name} ${artist.name}`,
-    `track:${artist.song_name}`,
-    artist.song_name,
+    deezerMeta?.isrc ? '' : `${deezerTitle} ${deezerArtist}`,
+    deezerMeta?.isrc ? '' : `track:${artist.song_name} artist:${artist.name}`,
   ].filter(Boolean)
 
   for (const query of queries) {

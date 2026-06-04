@@ -57,6 +57,9 @@ export default function FavoritesPage() {
         setSpotifyMessage('Spotify doit être configuré avant de pouvoir créer la playlist.')
       } else if (data.error === 'no_favorites') {
         setSpotifyMessage('Ajoutez au moins un favori avant de créer une playlist.')
+      } else if (data.status === 429) {
+        const wait = data.retryAfter ? ` Reessayez dans ${data.retryAfter} seconde${data.retryAfter !== 1 ? 's' : ''}.` : ' Reessayez dans une minute.'
+        setSpotifyMessage(`Spotify limite temporairement les requetes.${wait}`)
       } else {
         const detail = data.status ? ` Spotify a repondu ${data.status}.` : ''
         setSpotifyMessage(`Impossible de creer la playlist Spotify pour le moment.${detail}`)
