@@ -47,6 +47,58 @@ function uniqueById(tracks: SpotifyTrackCandidate[]) {
   })
 }
 
+function normalizeValue(value?: string) {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+}
+
+function trackScore(track: any, artist: ExportArtist) {
+  const wantedTitle = normalizeValue(artist.song_name)
+  const wantedArtist = normalizeValue(artist.name)
+  const trackTitle = normalizeValue(track?.name)
+  const trackArtists = (track?.artists || []).map((item: any) => normalizeValue(item?.name))
+
+  let score = 0
+  if (trackTitle === wantedTitle) score += 8
+  else if (trackTitle.includes(wantedTitle) || wantedTitle.includes(trackTitle)) score += 4
+
+  if (trackArtists.some((name: string) => name === wantedArtist)) score += 8
+  else if (trackArtists.some((name: string) => name.includes(wantedArtist) || wantedArtist.includes(name))) score += 4
+
+  return score
+}
+
+async function searchSpotifyTrack(token: string, artist: ExportArtist) {
+  const queries = [
+    `track:${artist.song_name} artist:${artist.name}`,
+    `${artist.song_name} ${artist.name}`,
+    `track:${artist.song_name}`,
+    artist.song_name,
+  ]
+
+  for (const query of queries) {
+    const q = encodeURIComponent(query)
+    const searchRes = await spotifyFetch(`/search?type=track&limit=5&market=from_token&q=${q}`, token)
+    if (!searchRes.ok) return { error: searchRes }
+
+    const search = await searchRes.json()
+    const tracks = search.tracks?.items || []
+    const bestTrack = tracks
+      .filter((track: any) => track?.id && track?.uri)
+      .sort((a: any, b: any) => trackScore(b, artist) - trackScore(a, artist))[0]
+
+    if (bestTrack?.id && bestTrack?.uri) {
+      return { track: { id: bestTrack.id, uri: bestTrack.uri } }
+    }
+  }
+
+  return { track: null }
+}
+
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get('spotify_access_token')?.value
@@ -69,15 +121,13 @@ export async function POST(req: NextRequest) {
   const missing: ExportArtist[] = []
 
   for (const artist of artists) {
-    const q = encodeURIComponent(`track:${artist.song_name} artist:${artist.name}`)
-    const searchRes = await spotifyFetch(`/search?type=track&limit=1&q=${q}`, token)
-    if (!searchRes.ok) {
+    const result = await searchSpotifyTrack(token, artist)
+    if (result.error) {
       missing.push(artist)
       continue
     }
 
-    const search = await searchRes.json()
-    const track = search.tracks?.items?.[0]
+    const track = result.track
     if (track?.id && track?.uri) {
       foundTracks.push({ id: track.id, uri: track.uri })
     } else {
