@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import type { User } from '@supabase/supabase-js'
 import { GENRE_COLORS } from '@/lib/genres'
+import { hasSupabasePublicConfig, supabase } from '@/lib/supabase'
 
 const CONTINENTS = [
   { name: 'EUROPE',    lat: 54,  lng: 15  },
@@ -75,6 +77,9 @@ export default function Globe() {
   const [selectedCountry, setSelectedCountry] = useState<CountryGroup | null>(null)
   const [showGenrePanel,  setShowGenrePanel]  = useState(false)
   const [panelGenre,      setPanelGenre]      = useState<string | null>(null)
+  const [user,            setUser]            = useState<User | null>(null)
+  const [favoriteIds,     setFavoriteIds]     = useState<Set<string>>(new Set())
+  const [favoriteBusy,    setFavoriteBusy]    = useState(false)
 
   onCountryClickRef.current = setSelectedCountry
 
@@ -112,6 +117,37 @@ export default function Globe() {
       clearInterval(iv)
     }
   }, [fetchArtists])
+
+  useEffect(() => {
+    if (!hasSupabasePublicConfig()) return
+    const supabaseClient = supabase()
+    supabaseClient.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null)
+    })
+
+    const { data } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => data.subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
+    if (!hasSupabasePublicConfig()) return
+    if (!user) {
+      setFavoriteIds(new Set())
+      return
+    }
+
+    const supabaseClient = supabase()
+    supabaseClient
+      .from('favorites')
+      .select('artist_id')
+      .eq('user_id', user.id)
+      .then(({ data, error }) => {
+        if (!error) setFavoriteIds(new Set((data || []).map(row => row.artist_id as string)))
+      })
+  }, [user])
 
   // ── globe ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -316,6 +352,48 @@ export default function Globe() {
     } else {
       setTooltip(artist)
     }
+  }
+
+  const toggleFavorite = async (artist: Artist) => {
+    if (!user) {
+      router.push('/connexion')
+      return
+    }
+
+    setFavoriteBusy(true)
+    if (!hasSupabasePublicConfig()) {
+      router.push('/connexion')
+      setFavoriteBusy(false)
+      return
+    }
+    const supabaseClient = supabase()
+    const isFavorite = favoriteIds.has(artist.id)
+
+    if (isFavorite) {
+      const { error } = await supabaseClient
+        .from('favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('artist_id', artist.id)
+
+      if (!error) {
+        setFavoriteIds(current => {
+          const next = new Set(current)
+          next.delete(artist.id)
+          return next
+        })
+      }
+    } else {
+      const { error } = await supabaseClient
+        .from('favorites')
+        .insert({ user_id: user.id, artist_id: artist.id })
+
+      if (!error) {
+        setFavoriteIds(current => new Set(current).add(artist.id))
+      }
+    }
+
+    setFavoriteBusy(false)
   }
 
   // ── JSX ────────────────────────────────────────────────────────────────────
@@ -615,6 +693,21 @@ export default function Globe() {
                 🎵 {tooltip.genre}
               </span>
             </div>
+
+            <button
+              onClick={() => toggleFavorite(tooltip)}
+              disabled={favoriteBusy}
+              className="w-full mb-3 rounded-xl px-4 py-2.5 text-sm font-bold transition-all"
+              style={{
+                background: favoriteIds.has(tooltip.id) ? 'rgba(200,216,0,0.16)' : 'var(--surface2)',
+                color: favoriteIds.has(tooltip.id) ? 'var(--primary)' : 'var(--text)',
+                border: '1px solid ' + (favoriteIds.has(tooltip.id) ? 'rgba(200,216,0,0.35)' : 'var(--border)'),
+                opacity: favoriteBusy ? 0.6 : 1,
+              }}
+              type="button"
+            >
+              {favoriteIds.has(tooltip.id) ? '★ Retirer des favoris' : '☆ Ajouter aux favoris'}
+            </button>
 
             {/* Raison */}
             {tooltip.reason && (

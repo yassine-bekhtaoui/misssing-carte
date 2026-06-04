@@ -3,6 +3,7 @@ import { DM_Sans } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
+import AuthNav from "@/components/AuthNav";
 
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
@@ -54,6 +55,7 @@ export default function RootLayout({
 
             <div className="flex gap-2 items-center flex-shrink-0">
               <Link href="/" className="nav-link text-sm font-medium hidden sm:block">Globe</Link>
+              <AuthNav />
               <Link
                 href="/proposer"
                 className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"

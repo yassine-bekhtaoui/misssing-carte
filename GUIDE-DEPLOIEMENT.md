@@ -42,3 +42,10 @@ git commit -m "Initial commit"
 git remote add origin https://github.com/VOTRE-NOM/music-map.git
 git push -u origin main
 ```
+
+## Favoris utilisateurs
+
+Pour activer les comptes et les favoris :
+
+1. Dans Supabase, aller dans **Authentication > Providers** et vÃ©rifier que Email est activÃ©.
+2. Dans **SQL Editor**, exÃ©cuter le contenu de `supabase-favorites.sql`.
