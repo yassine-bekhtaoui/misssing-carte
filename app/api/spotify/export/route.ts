@@ -92,6 +92,9 @@ export async function POST(req: NextRequest) {
     const batch = tracks.slice(i, i + 50)
     const containsRes = await spotifyFetch(`/me/tracks/contains?ids=${batch.map(track => track.id).join(',')}`, token)
     if (!containsRes.ok) {
+      if ([401, 403].includes(containsRes.status)) {
+        return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
+      }
       return spotifyError(containsRes, 'liked_lookup_failed')
     }
 
@@ -109,6 +112,9 @@ export async function POST(req: NextRequest) {
     })
 
     if (!addRes.ok) {
+      if ([401, 403].includes(addRes.status)) {
+        return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
+      }
       return spotifyError(addRes, 'like_tracks_failed')
     }
   }
