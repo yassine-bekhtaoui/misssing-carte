@@ -86,7 +86,6 @@ export const COUNTRIES: Country[] = [
   { code: 'IR', name: 'Iran', lat: 32.43, lng: 53.69 },
   { code: 'IQ', name: 'Irak', lat: 33.22, lng: 43.68 },
   { code: 'IE', name: 'Irlande', lat: 53.41, lng: -8.24 },
-  { code: 'IL', name: 'Israël', lat: 31.05, lng: 34.85 },
   { code: 'IT', name: 'Italie', lat: 41.87, lng: 12.57 },
   { code: 'JM', name: 'Jamaïque', lat: 18.11, lng: -77.30 },
   { code: 'JP', name: 'Japon', lat: 36.20, lng: 138.25 },

@@ -28,7 +28,12 @@ export default function AuthPage() {
     const supabaseClient = supabase()
     const credentials = { email: email.trim(), password }
     const result = mode === 'signup'
-      ? await supabaseClient.auth.signUp(credentials)
+      ? await supabaseClient.auth.signUp({
+          ...credentials,
+          options: {
+            emailRedirectTo: `${window.location.origin}/favoris`,
+          },
+        })
       : await supabaseClient.auth.signInWithPassword(credentials)
 
     setLoading(false)
