@@ -192,6 +192,19 @@ export default function FavoritesPage() {
     return `https://open.spotify.com/search/${encodeURIComponent(`${artist.name} ${artist.song_name}`)}`
   }
 
+  const spotifyAppSearchUrl = (artist: Artist) => {
+    return `spotify:search:${encodeURIComponent(`${artist.name} ${artist.song_name}`)}`
+  }
+
+  const openSpotifySearch = (artist: Artist) => {
+    window.location.href = spotifyAppSearchUrl(artist)
+    window.setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        window.open(spotifySearchUrl(artist), '_blank', 'noopener,noreferrer')
+      }
+    }, 900)
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)', color: 'var(--muted)' }}>
@@ -273,15 +286,14 @@ export default function FavoritesPage() {
                     <p className="font-bold truncate" style={{ color: 'var(--text)' }}>{artist.name}</p>
                     <p className="text-sm truncate" style={{ color: 'var(--muted)' }}>{artist.song_name}</p>
                   </div>
-                  <a
+                  <button
                     className="font-bold px-3 py-2 rounded-xl text-sm shrink-0"
-                    href={spotifySearchUrl(artist)}
-                    rel="noreferrer"
+                    onClick={() => openSpotifySearch(artist)}
                     style={{ background: '#1db954', color: '#06140b' }}
-                    target="_blank"
+                    type="button"
                   >
                     Chercher
-                  </a>
+                  </button>
                 </div>
               ))}
             </div>
