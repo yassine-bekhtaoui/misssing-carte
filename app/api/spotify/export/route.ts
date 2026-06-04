@@ -21,6 +21,18 @@ async function spotifyFetch(path: string, token: string, init: RequestInit = {})
   })
 }
 
+async function spotifyError(res: Response, error: string) {
+  const detail = await res.text().catch(() => '')
+  return NextResponse.json(
+    {
+      error,
+      status: res.status,
+      detail: detail.slice(0, 500),
+    },
+    { status: res.status >= 400 && res.status < 600 ? res.status : 500 }
+  )
+}
+
 function uniqueValues(values: string[]) {
   return [...new Set(values)]
 }
@@ -45,11 +57,11 @@ export async function POST(req: NextRequest) {
 
   const meRes = await spotifyFetch('/me', token)
   if (!meRes.ok) {
-    return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
+    return spotifyError(meRes, 'spotify_not_connected')
   }
   const me = await meRes.json()
 
-  const playlistRes = await spotifyFetch(`/users/${me.id}/playlists`, token, {
+  const playlistRes = await spotifyFetch('/me/playlists', token, {
     method: 'POST',
     body: JSON.stringify({
       name: "MISS'SING - Mes favoris",
@@ -59,7 +71,7 @@ export async function POST(req: NextRequest) {
   })
 
   if (!playlistRes.ok) {
-    return NextResponse.json({ error: 'playlist_failed' }, { status: 500 })
+    return spotifyError(playlistRes, 'playlist_failed')
   }
 
   const playlist = await playlistRes.json()
@@ -82,13 +94,13 @@ export async function POST(req: NextRequest) {
 
   const uris = uniqueValues(foundUris)
   if (uris.length > 0) {
-    const addRes = await spotifyFetch(`/playlists/${playlist.id}/tracks`, token, {
+    const addRes = await spotifyFetch(`/playlists/${playlist.id}/items`, token, {
       method: 'POST',
       body: JSON.stringify({ uris }),
     })
 
     if (!addRes.ok) {
-      return NextResponse.json({ error: 'add_tracks_failed' }, { status: 500 })
+      return spotifyError(addRes, 'add_tracks_failed')
     }
   }
 

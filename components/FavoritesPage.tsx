@@ -52,7 +52,8 @@ export default function FavoritesPage() {
       } else if (data.error === 'no_favorites') {
         setSpotifyMessage('Ajoutez au moins un favori avant de créer une playlist.')
       } else {
-        setSpotifyMessage('Impossible de créer la playlist Spotify pour le moment.')
+        const detail = data.status ? ` Spotify a repondu ${data.status}.` : ''
+        setSpotifyMessage(`Impossible de creer la playlist Spotify pour le moment.${detail}`)
       }
       return
     }
@@ -245,3 +246,4 @@ export default function FavoritesPage() {
     </div>
   )
 }
+
