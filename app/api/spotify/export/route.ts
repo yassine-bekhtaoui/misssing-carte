@@ -13,6 +13,12 @@ interface SpotifyTrackCandidate {
   uri: string
 }
 
+interface DeezerTrackMeta {
+  artistName?: string
+  isrc?: string
+  title?: string
+}
+
 const SPOTIFY_API = 'https://api.spotify.com/v1'
 
 async function spotifyFetch(path: string, token: string, init: RequestInit = {}) {
@@ -72,13 +78,42 @@ function trackScore(track: any, artist: ExportArtist) {
   return score
 }
 
+async function getDeezerTrackMeta(trackId?: string) {
+  if (!trackId) return null
+
+  try {
+    const res = await fetch(`https://api.deezer.com/track/${trackId}`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+
+    const track = await res.json()
+    return {
+      artistName: track.artist?.name,
+      isrc: track.isrc,
+      title: track.title,
+    } satisfies DeezerTrackMeta
+  } catch {
+    return null
+  }
+}
+
 async function searchSpotifyTrack(token: string, artist: ExportArtist) {
+  const deezerMeta = await getDeezerTrackMeta(artist.deezer_track_id)
+  const deezerTitle = deezerMeta?.title || artist.song_name
+  const deezerArtist = deezerMeta?.artistName || artist.name
+
   const queries = [
+    deezerMeta?.isrc ? `isrc:${deezerMeta.isrc}` : '',
+    `track:${deezerTitle} artist:${deezerArtist}`,
+    `${deezerTitle} ${deezerArtist}`,
+    `track:${deezerTitle}`,
+    deezerTitle,
     `track:${artist.song_name} artist:${artist.name}`,
     `${artist.song_name} ${artist.name}`,
     `track:${artist.song_name}`,
     artist.song_name,
-  ]
+  ].filter(Boolean)
 
   for (const query of queries) {
     const q = encodeURIComponent(query)
@@ -89,7 +124,10 @@ async function searchSpotifyTrack(token: string, artist: ExportArtist) {
     const tracks = search.tracks?.items || []
     const bestTrack = tracks
       .filter((track: any) => track?.id && track?.uri)
-      .sort((a: any, b: any) => trackScore(b, artist) - trackScore(a, artist))[0]
+      .sort((a: any, b: any) => {
+        const scoreArtist = { ...artist, name: deezerArtist, song_name: deezerTitle }
+        return trackScore(b, scoreArtist) - trackScore(a, scoreArtist)
+      })[0]
 
     if (bestTrack?.id && bestTrack?.uri) {
       return { track: { id: bestTrack.id, uri: bestTrack.uri } }
