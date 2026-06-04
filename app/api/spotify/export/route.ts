@@ -117,7 +117,7 @@ async function searchSpotifyTrack(token: string, artist: ExportArtist) {
 
   for (const query of queries) {
     const q = encodeURIComponent(query)
-    const searchRes = await spotifyFetch(`/search?type=track&limit=5&market=from_token&q=${q}`, token)
+    const searchRes = await spotifyFetch(`/search?type=track&limit=10&q=${q}`, token)
     if (!searchRes.ok) return { error: searchRes }
 
     const search = await searchRes.json()
@@ -161,8 +161,7 @@ export async function POST(req: NextRequest) {
   for (const artist of artists) {
     const result = await searchSpotifyTrack(token, artist)
     if (result.error) {
-      missing.push(artist)
-      continue
+      return spotifyError(result.error, 'spotify_search_failed')
     }
 
     const track = result.track
