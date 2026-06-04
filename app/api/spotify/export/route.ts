@@ -76,7 +76,7 @@ async function getExistingPlaylist(token: string, userId: string) {
 async function getPlaylistTracks(token: string, playlistId: string) {
   const uris = new Set<string>()
   const keys = new Set<string>()
-  let nextPath: string | null = `/playlists/${playlistId}/items?fields=items(track(uri,name,artists(name))),next&limit=100`
+  let nextPath: string | null = `/playlists/${playlistId}/tracks?limit=100`
 
   while (nextPath) {
     const itemsRes = await spotifyFetch(nextPath, token)
