@@ -39,7 +39,7 @@ export default function FavoritesPage() {
 
     if (res.status === 401) {
       sessionStorage.setItem('spotify_export_pending', '1')
-      window.location.href = '/api/spotify/login'
+      window.location.href = '/api/spotify/login?export=1'
       return
     }
 
@@ -116,7 +116,12 @@ export default function FavoritesPage() {
       setArtists(nextArtists)
       setLoading(false)
 
-      if (spotifyStatus === 'connected' && sessionStorage.getItem('spotify_export_pending') === '1') {
+      const shouldExportToSpotify =
+        spotifyStatus === 'connected' &&
+        (sessionStorage.getItem('spotify_export_pending') === '1' ||
+          new URLSearchParams(window.location.search).get('export') === '1')
+
+      if (shouldExportToSpotify) {
         sessionStorage.removeItem('spotify_export_pending')
         window.history.replaceState({}, '', '/favoris')
         exportToSpotify(nextArtists)

@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { spotifyRedirectUri } from '@/lib/spotify'
+import { spotifyAppOrigin, spotifyRedirectUri } from '@/lib/spotify'
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
@@ -9,11 +9,12 @@ export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get('state')
   const cookieStore = await cookies()
   const savedState = cookieStore.get('spotify_oauth_state')?.value
+  const shouldExport = cookieStore.get('spotify_export_pending')?.value === '1'
   const clientId = process.env.SPOTIFY_CLIENT_ID
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
 
   if (!code || !state || !savedState || state !== savedState || !clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/favoris?spotify=auth-error', req.nextUrl.origin))
+    return NextResponse.redirect(new URL('/favoris?spotify=auth-error', spotifyAppOrigin(req)))
   }
 
   const redirectUri = spotifyRedirectUri(req)
@@ -32,12 +33,16 @@ export async function GET(req: NextRequest) {
   })
 
   if (!tokenRes.ok) {
-    return NextResponse.redirect(new URL('/favoris?spotify=auth-error', req.nextUrl.origin))
+    return NextResponse.redirect(new URL('/favoris?spotify=auth-error', spotifyAppOrigin(req)))
   }
 
   const token = await tokenRes.json()
-  cookieStore.delete('spotify_oauth_state')
-  cookieStore.set('spotify_access_token', token.access_token, {
+  const nextPath = shouldExport ? '/favoris?spotify=connected&export=1' : '/favoris?spotify=connected'
+  const response = NextResponse.redirect(new URL(nextPath, spotifyAppOrigin(req)))
+
+  response.cookies.delete('spotify_oauth_state')
+  response.cookies.delete('spotify_export_pending')
+  response.cookies.set('spotify_access_token', token.access_token, {
     httpOnly: true,
     sameSite: 'lax',
     secure: req.nextUrl.protocol === 'https:',
@@ -45,5 +50,5 @@ export async function GET(req: NextRequest) {
     maxAge: Math.max(60, Number(token.expires_in || 3600) - 60),
   })
 
-  return NextResponse.redirect(new URL('/favoris?spotify=connected', req.nextUrl.origin))
+  return response
 }

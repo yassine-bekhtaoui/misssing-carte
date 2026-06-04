@@ -1,5 +1,10 @@
 import type { NextRequest } from 'next/server'
 
+export function spotifyAppOrigin(req: NextRequest) {
+  const host = req.headers.get('host') || req.nextUrl.host
+  return `${req.nextUrl.protocol}//${host}`
+}
+
 export function spotifyRedirectUri(req: NextRequest) {
   const host = req.headers.get('host') || req.nextUrl.host
 

@@ -1,6 +1,5 @@
-import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { spotifyRedirectUri } from '@/lib/spotify'
+import { spotifyAppOrigin, spotifyRedirectUri } from '@/lib/spotify'
 
 const SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
 const SCOPES = ['playlist-modify-private', 'playlist-modify-public'].join(' ')
@@ -21,13 +20,20 @@ export async function GET(req: NextRequest) {
   const clientId = process.env.SPOTIFY_CLIENT_ID
 
   if (!clientId) {
-    return NextResponse.redirect(new URL('/favoris?spotify=missing-config', req.nextUrl.origin))
+    return NextResponse.redirect(new URL('/favoris?spotify=missing-config', spotifyAppOrigin(req)))
   }
 
   const state = randomState()
   const redirectUri = spotifyRedirectUri(req)
-  const cookieStore = await cookies()
-  cookieStore.set('spotify_oauth_state', state, {
+  const response = NextResponse.redirect(`${SPOTIFY_AUTHORIZE_URL}?${new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    scope: SCOPES,
+    redirect_uri: redirectUri,
+    state,
+  }).toString()}`)
+
+  response.cookies.set('spotify_oauth_state', state, {
     httpOnly: true,
     sameSite: 'lax',
     secure: req.nextUrl.protocol === 'https:',
@@ -35,13 +41,15 @@ export async function GET(req: NextRequest) {
     maxAge: 600,
   })
 
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: clientId,
-    scope: SCOPES,
-    redirect_uri: redirectUri,
-    state,
-  })
+  if (req.nextUrl.searchParams.get('export') === '1') {
+    response.cookies.set('spotify_export_pending', '1', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: req.nextUrl.protocol === 'https:',
+      path: '/',
+      maxAge: 600,
+    })
+  }
 
-  return NextResponse.redirect(`${SPOTIFY_AUTHORIZE_URL}?${params.toString()}`)
+  return response
 }
