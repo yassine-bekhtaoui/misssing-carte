@@ -23,9 +23,26 @@ export default function FavoritesPage() {
   const [error, setError] = useState('')
   const [spotifyLoading, setSpotifyLoading] = useState(false)
   const [spotifyMessage, setSpotifyMessage] = useState('')
+  const [spotifyCooldownUntil, setSpotifyCooldownUntil] = useState(0)
+  const spotifyCooldownActive = spotifyCooldownUntil > Date.now()
+
+  const formatWait = (seconds: number) => {
+    if (seconds >= 3600) {
+      const hours = Math.ceil(seconds / 3600)
+      return `${hours} heure${hours !== 1 ? 's' : ''}`
+    }
+
+    const minutes = Math.max(1, Math.ceil(seconds / 60))
+    return `${minutes} minute${minutes !== 1 ? 's' : ''}`
+  }
 
   const exportToSpotify = async (favoriteArtists = artists, allowLoginRedirect = true) => {
     if (favoriteArtists.length === 0) return
+    const cooldownRemaining = Math.ceil((spotifyCooldownUntil - Date.now()) / 1000)
+    if (cooldownRemaining > 0) {
+      setSpotifyMessage(`Spotify limite temporairement les requetes. Reessayez dans ${formatWait(cooldownRemaining)}.`)
+      return
+    }
 
     setSpotifyLoading(true)
     setSpotifyMessage('')
@@ -58,8 +75,11 @@ export default function FavoritesPage() {
       } else if (data.error === 'no_favorites') {
         setSpotifyMessage('Ajoutez au moins un favori avant de créer une playlist.')
       } else if (data.status === 429) {
-        const wait = data.retryAfter ? ` Reessayez dans ${data.retryAfter} seconde${data.retryAfter !== 1 ? 's' : ''}.` : ' Reessayez dans une minute.'
-        setSpotifyMessage(`Spotify limite temporairement les requetes.${wait}`)
+        const retryAfter = Number(data.retryAfter || 60)
+        const cooldownUntil = Date.now() + retryAfter * 1000
+        setSpotifyCooldownUntil(cooldownUntil)
+        localStorage.setItem('spotify_cooldown_until', String(cooldownUntil))
+        setSpotifyMessage(`Spotify limite temporairement les requetes. Reessayez dans ${formatWait(retryAfter)}.`)
       } else {
         const detail = data.status ? ` Spotify a repondu ${data.status}.` : ''
         setSpotifyMessage(`Impossible de creer la playlist Spotify pour le moment.${detail}`)
@@ -88,6 +108,11 @@ export default function FavoritesPage() {
   }
 
   useEffect(() => {
+    const savedCooldown = Number(localStorage.getItem('spotify_cooldown_until') || 0)
+    if (savedCooldown > Date.now()) {
+      setSpotifyCooldownUntil(savedCooldown)
+    }
+
     const load = async () => {
       setLoading(true)
       setError('')
@@ -210,11 +235,11 @@ export default function FavoritesPage() {
           <div className="flex gap-2">
             <button
               onClick={() => exportToSpotify()}
-              disabled={spotifyLoading || artists.length === 0}
+              disabled={spotifyLoading || spotifyCooldownActive || artists.length === 0}
               className="font-bold px-4 py-2 rounded-xl"
               style={{
-                background: artists.length > 0 ? '#1db954' : 'var(--surface2)',
-                color: artists.length > 0 ? '#06140b' : 'var(--muted2)',
+                background: artists.length > 0 && !spotifyCooldownActive ? '#1db954' : 'var(--surface2)',
+                color: artists.length > 0 && !spotifyCooldownActive ? '#06140b' : 'var(--muted2)',
                 opacity: spotifyLoading ? 0.7 : 1,
               }}
               type="button"
