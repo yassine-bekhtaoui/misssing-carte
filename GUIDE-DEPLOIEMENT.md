@@ -49,3 +49,15 @@ Pour activer les comptes et les favoris :
 
 1. Dans Supabase, aller dans **Authentication > Providers** et vÃ©rifier que Email est activÃ©.
 2. Dans **SQL Editor**, exÃ©cuter le contenu de `supabase-favorites.sql`.
+
+## Export Spotify
+
+Pour crÃ©er une playlist Spotify depuis les favoris :
+
+1. CrÃ©er une application sur https://developer.spotify.com/dashboard
+2. Ajouter les Redirect URIs :
+   - `http://127.0.0.1:3000/api/spotify/callback`
+   - `https://misssing-carte.vercel.app/api/spotify/callback`
+3. Ajouter dans `.env.local` et Vercel :
+   - `SPOTIFY_CLIENT_ID`
+   - `SPOTIFY_CLIENT_SECRET`

@@ -14,6 +14,7 @@ interface Artist {
   genre: string
   deezer_artist_image?: string
   deezer_preview_url?: string
+  deezer_track_id?: string
 }
 
 export default function FavoritesPage() {
@@ -21,6 +22,48 @@ export default function FavoritesPage() {
   const [artists, setArtists] = useState<Artist[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [spotifyLoading, setSpotifyLoading] = useState(false)
+  const [spotifyMessage, setSpotifyMessage] = useState('')
+
+  const exportToSpotify = async (favoriteArtists = artists) => {
+    if (favoriteArtists.length === 0) return
+
+    setSpotifyLoading(true)
+    setSpotifyMessage('')
+
+    const res = await fetch('/api/spotify/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ artists: favoriteArtists }),
+    })
+
+    if (res.status === 401) {
+      sessionStorage.setItem('spotify_export_pending', '1')
+      window.location.href = '/api/spotify/login'
+      return
+    }
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      setSpotifyLoading(false)
+      if (data.error === 'missing_config') {
+        setSpotifyMessage('Spotify doit être configuré avant de pouvoir créer la playlist.')
+      } else if (data.error === 'no_favorites') {
+        setSpotifyMessage('Ajoutez au moins un favori avant de créer une playlist.')
+      } else {
+        setSpotifyMessage('Impossible de créer la playlist Spotify pour le moment.')
+      }
+      return
+    }
+
+    setSpotifyLoading(false)
+    setSpotifyMessage(`${data.added} titre${data.added !== 1 ? 's' : ''} ajouté${data.added !== 1 ? 's' : ''}.`)
+
+    if (data.playlistUrl) {
+      window.location.href = data.playlistUrl
+    }
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -58,8 +101,14 @@ export default function FavoritesPage() {
 
       const favoriteIds = new Set((favoriteRows || []).map(row => row.artist_id as string))
       const approvedArtists = await fetch('/api/submit').then(r => r.json())
-      setArtists(Array.isArray(approvedArtists) ? approvedArtists.filter(a => favoriteIds.has(a.id)) : [])
+      const nextArtists = Array.isArray(approvedArtists) ? approvedArtists.filter(a => favoriteIds.has(a.id)) : []
+      setArtists(nextArtists)
       setLoading(false)
+
+      if (sessionStorage.getItem('spotify_export_pending') === '1') {
+        sessionStorage.removeItem('spotify_export_pending')
+        exportToSpotify(nextArtists)
+      }
     }
 
     load()
@@ -119,12 +168,28 @@ export default function FavoritesPage() {
             <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>Mes favoris</h1>
             <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>{artists.length} artiste{artists.length !== 1 ? 's' : ''}</p>
           </div>
-          <Link href="/" className="font-bold px-4 py-2 rounded-xl" style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}>
-            Globe
-          </Link>
+          <div className="flex gap-2">
+            <button
+              onClick={() => exportToSpotify()}
+              disabled={spotifyLoading || artists.length === 0}
+              className="font-bold px-4 py-2 rounded-xl"
+              style={{
+                background: artists.length > 0 ? '#1db954' : 'var(--surface2)',
+                color: artists.length > 0 ? '#06140b' : 'var(--muted2)',
+                opacity: spotifyLoading ? 0.7 : 1,
+              }}
+              type="button"
+            >
+              {spotifyLoading ? 'Spotify...' : 'Spotify'}
+            </button>
+            <Link href="/" className="font-bold px-4 py-2 rounded-xl" style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}>
+              Globe
+            </Link>
+          </div>
         </div>
 
         {error && <p className="rounded-xl p-4 mb-4 text-sm" style={{ background: 'var(--surface)', color: '#f87171', border: '1px solid var(--border)' }}>{error}</p>}
+        {spotifyMessage && <p className="rounded-xl p-4 mb-4 text-sm" style={{ background: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }}>{spotifyMessage}</p>}
 
         {!error && artists.length === 0 && (
           <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
