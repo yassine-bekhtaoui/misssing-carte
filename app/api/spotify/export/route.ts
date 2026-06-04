@@ -8,6 +8,11 @@ interface ExportArtist {
   deezer_track_id?: string
 }
 
+interface SpotifyTrackCandidate {
+  uri: string
+  key: string
+}
+
 const SPOTIFY_API = 'https://api.spotify.com/v1'
 const PLAYLIST_NAME = "MISS'SING - Mes favoris"
 
@@ -38,6 +43,19 @@ function uniqueValues(values: string[]) {
   return [...new Set(values)]
 }
 
+function normalizeValue(value?: string) {
+  return (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+}
+
+function trackKey(trackName?: string, artistNames: string[] = []) {
+  return `${normalizeValue(trackName)}::${artistNames.map(normalizeValue).sort().join('|')}`
+}
+
 async function getExistingPlaylist(token: string, userId: string) {
   let nextPath: string | null = '/me/playlists?limit=50'
 
@@ -55,9 +73,10 @@ async function getExistingPlaylist(token: string, userId: string) {
   return { playlist: null }
 }
 
-async function getPlaylistTrackUris(token: string, playlistId: string) {
+async function getPlaylistTracks(token: string, playlistId: string) {
   const uris = new Set<string>()
-  let nextPath: string | null = `/playlists/${playlistId}/items?fields=items(track(uri)),next&limit=100`
+  const keys = new Set<string>()
+  let nextPath: string | null = `/playlists/${playlistId}/items?fields=items(track(uri,name,artists(name))),next&limit=100`
 
   while (nextPath) {
     const itemsRes = await spotifyFetch(nextPath, token)
@@ -66,12 +85,15 @@ async function getPlaylistTrackUris(token: string, playlistId: string) {
     const items = await itemsRes.json()
     for (const item of items.items || []) {
       if (item?.track?.uri) uris.add(item.track.uri)
+      if (item?.track?.name) {
+        keys.add(trackKey(item.track.name, (item.track.artists || []).map((artist: any) => artist.name)))
+      }
     }
 
     nextPath = items.next ? items.next.replace(SPOTIFY_API, '') : null
   }
 
-  return { uris }
+  return { uris, keys }
 }
 
 export async function POST(req: NextRequest) {
@@ -123,7 +145,7 @@ export async function POST(req: NextRequest) {
 
     playlist = await playlistRes.json()
   }
-  const foundUris: string[] = []
+  const foundTracks: SpotifyTrackCandidate[] = []
   const missing: ExportArtist[] = []
 
   for (const artist of artists) {
@@ -135,13 +157,22 @@ export async function POST(req: NextRequest) {
     }
 
     const search = await searchRes.json()
-    const uri = search.tracks?.items?.[0]?.uri
-    if (uri) foundUris.push(uri)
+    const track = search.tracks?.items?.[0]
+    const uri = track?.uri
+    if (uri) {
+      foundTracks.push({
+        uri,
+        key: trackKey(track.name, (track.artists || []).map((artist: any) => artist.name)),
+      })
+    }
     else missing.push(artist)
   }
 
-  const uris = uniqueValues(foundUris)
-  const playlistTracks = await getPlaylistTrackUris(token, playlist.id)
+  const uniqueTracks = foundTracks.filter((track, index, list) => {
+    return list.findIndex(candidate => candidate.uri === track.uri || candidate.key === track.key) === index
+  })
+
+  const playlistTracks = await getPlaylistTracks(token, playlist.id)
   if (playlistTracks.error) {
     if ([401, 403].includes(playlistTracks.error.status)) {
       return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
@@ -150,7 +181,9 @@ export async function POST(req: NextRequest) {
   }
 
   const existingUris = playlistTracks.uris || new Set<string>()
-  const urisToAdd = uris.filter(uri => !existingUris.has(uri))
+  const existingKeys = playlistTracks.keys || new Set<string>()
+  const tracksToAdd = uniqueTracks.filter(track => !existingUris.has(track.uri) && !existingKeys.has(track.key))
+  const urisToAdd = tracksToAdd.map(track => track.uri)
 
   for (let i = 0; i < urisToAdd.length; i += 100) {
     const addRes = await spotifyFetch(`/playlists/${playlist.id}/items`, token, {
@@ -167,7 +200,7 @@ export async function POST(req: NextRequest) {
     playlistUrl: playlist.external_urls?.spotify,
     playlistUri: playlist.uri,
     added: urisToAdd.length,
-    alreadyAdded: uris.length - urisToAdd.length,
+    alreadyAdded: uniqueTracks.length - urisToAdd.length,
     missing: missing.map(artist => ({ name: artist.name, song_name: artist.song_name })),
   })
 }

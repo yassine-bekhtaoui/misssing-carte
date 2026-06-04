@@ -24,15 +24,20 @@ export default function FavoritesPage() {
   const [spotifyLoading, setSpotifyLoading] = useState(false)
   const [spotifyMessage, setSpotifyMessage] = useState('')
 
-  const openSpotifyPlaylist = (playlistUri?: string, playlistUrl?: string) => {
+  const openSpotifyPlaylist = (playlistUri?: string, playlistUrl?: string, targetWindow?: Window | null) => {
+    const openedWindow = targetWindow || window.open('', '_blank')
+
     if (playlistUri) {
-      window.open(playlistUri, '_blank', 'noopener,noreferrer')
+      if (openedWindow) openedWindow.location.href = playlistUri
+      else window.location.href = playlistUri
     }
 
     if (playlistUrl) {
       window.setTimeout(() => {
-        window.open(playlistUrl, '_blank', 'noopener,noreferrer')
-      }, 500)
+        if (document.visibilityState !== 'visible') return
+        if (openedWindow) openedWindow.location.href = playlistUrl
+        else window.open(playlistUrl, '_blank', 'noopener,noreferrer')
+      }, 1200)
     }
   }
 
@@ -41,6 +46,7 @@ export default function FavoritesPage() {
 
     setSpotifyLoading(true)
     setSpotifyMessage('')
+    const spotifyWindow = window.open('', '_blank')
 
     const res = await fetch('/api/spotify/export', {
       method: 'POST',
@@ -49,6 +55,7 @@ export default function FavoritesPage() {
     })
 
     if (res.status === 401) {
+      spotifyWindow?.close()
       sessionStorage.setItem('spotify_export_pending', '1')
       window.location.href = '/api/spotify/login?export=1'
       return
@@ -57,6 +64,7 @@ export default function FavoritesPage() {
     const data = await res.json()
 
     if (!res.ok) {
+      spotifyWindow?.close()
       setSpotifyLoading(false)
       if (data.error === 'missing_config') {
         setSpotifyMessage('Spotify doit être configuré avant de pouvoir créer la playlist.')
@@ -73,7 +81,7 @@ export default function FavoritesPage() {
     setSpotifyMessage(`${data.added} titre${data.added !== 1 ? 's' : ''} ajouté${data.added !== 1 ? 's' : ''}.`)
 
     if (data.playlistUri || data.playlistUrl) {
-      openSpotifyPlaylist(data.playlistUri, data.playlistUrl)
+      openSpotifyPlaylist(data.playlistUri, data.playlistUrl, spotifyWindow)
     }
   }
 
