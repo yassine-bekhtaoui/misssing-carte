@@ -24,6 +24,7 @@ export default function FavoritesPage() {
   const [spotifyLoading, setSpotifyLoading] = useState(false)
   const [spotifyMessage, setSpotifyMessage] = useState('')
   const [spotifyCooldownUntil, setSpotifyCooldownUntil] = useState(0)
+  const [showSpotifySearch, setShowSpotifySearch] = useState(false)
   const spotifyCooldownActive = spotifyCooldownUntil > Date.now()
 
   const formatWait = (seconds: number) => {
@@ -171,7 +172,8 @@ export default function FavoritesPage() {
       if (shouldExportToSpotify) {
         sessionStorage.removeItem('spotify_export_pending')
         window.history.replaceState({}, '', '/favoris')
-        exportToSpotify(nextArtists, false)
+        setShowSpotifySearch(true)
+        setSpotifyMessage('Export automatique Spotify desactive. Utilisez les boutons de recherche Spotify ci-dessous.')
       }
     }
 
@@ -184,6 +186,10 @@ export default function FavoritesPage() {
     const supabaseClient = supabase()
     await supabaseClient.from('favorites').delete().eq('user_id', user.id).eq('artist_id', artistId)
     setArtists(current => current.filter(artist => artist.id !== artistId))
+  }
+
+  const spotifySearchUrl = (artist: Artist) => {
+    return `https://open.spotify.com/search/${encodeURIComponent(`${artist.name} ${artist.song_name}`)}`
   }
 
   if (loading) {
@@ -234,17 +240,20 @@ export default function FavoritesPage() {
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => exportToSpotify()}
-              disabled={spotifyLoading || spotifyCooldownActive || artists.length === 0}
+              onClick={() => {
+                setShowSpotifySearch(current => !current)
+                setSpotifyMessage('')
+              }}
+              disabled={artists.length === 0}
               className="font-bold px-4 py-2 rounded-xl"
               style={{
-                background: artists.length > 0 && !spotifyCooldownActive ? '#1db954' : 'var(--surface2)',
-                color: artists.length > 0 && !spotifyCooldownActive ? '#06140b' : 'var(--muted2)',
+                background: artists.length > 0 ? '#1db954' : 'var(--surface2)',
+                color: artists.length > 0 ? '#06140b' : 'var(--muted2)',
                 opacity: spotifyLoading ? 0.7 : 1,
               }}
               type="button"
             >
-              {spotifyLoading ? 'Spotify...' : 'Spotify'}
+              Spotify
             </button>
             <Link href="/" className="font-bold px-4 py-2 rounded-xl" style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}>
               Globe
@@ -254,6 +263,30 @@ export default function FavoritesPage() {
 
         {error && <p className="rounded-xl p-4 mb-4 text-sm" style={{ background: 'var(--surface)', color: '#f87171', border: '1px solid var(--border)' }}>{error}</p>}
         {spotifyMessage && <p className="rounded-xl p-4 mb-4 text-sm" style={{ background: 'var(--surface)', color: 'var(--muted)', border: '1px solid var(--border)' }}>{spotifyMessage}</p>}
+
+        {showSpotifySearch && artists.length > 0 && (
+          <div className="rounded-2xl p-4 mb-4" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div className="grid gap-2">
+              {artists.map(artist => (
+                <div key={`spotify-${artist.id}`} className="flex items-center justify-between gap-3 rounded-xl p-3" style={{ background: 'var(--surface2)' }}>
+                  <div className="min-w-0">
+                    <p className="font-bold truncate" style={{ color: 'var(--text)' }}>{artist.name}</p>
+                    <p className="text-sm truncate" style={{ color: 'var(--muted)' }}>{artist.song_name}</p>
+                  </div>
+                  <a
+                    className="font-bold px-3 py-2 rounded-xl text-sm shrink-0"
+                    href={spotifySearchUrl(artist)}
+                    rel="noreferrer"
+                    style={{ background: '#1db954', color: '#06140b' }}
+                    target="_blank"
+                  >
+                    Chercher
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {!error && artists.length === 0 && (
           <div className="rounded-2xl p-8 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
