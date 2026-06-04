@@ -69,6 +69,19 @@ export default function FavoritesPage() {
 
     const already = data.alreadyAdded ? ` ${data.alreadyAdded} deja present${data.alreadyAdded !== 1 ? 's' : ''}.` : ''
     setSpotifyMessage(`${data.added} titre${data.added !== 1 ? 's' : ''} ajoute${data.added !== 1 ? 's' : ''} aux Titres likes.${already}`)
+    const addedCount = Number(data.added || 0)
+    const alreadyCount = Number(data.alreadyAdded || 0)
+    const missingCount = Array.isArray(data.missing) ? data.missing.length : 0
+
+    if (addedCount === 0 && alreadyCount > 0) {
+      setSpotifyMessage(`Tous les titres trouves sont deja dans tes Titres likes. ${missingCount ? `${missingCount} introuvable${missingCount !== 1 ? 's' : ''}.` : ''}`)
+    } else if (addedCount === 0 && missingCount > 0) {
+      setSpotifyMessage(`Aucun nouveau titre ajoute. ${missingCount} titre${missingCount !== 1 ? 's' : ''} introuvable${missingCount !== 1 ? 's' : ''} sur Spotify.`)
+    } else {
+      const alreadyMessage = alreadyCount ? ` ${alreadyCount} deja present${alreadyCount !== 1 ? 's' : ''}.` : ''
+      const missingMessage = missingCount ? ` ${missingCount} introuvable${missingCount !== 1 ? 's' : ''}.` : ''
+      setSpotifyMessage(`${addedCount} titre${addedCount !== 1 ? 's' : ''} ajoute${addedCount !== 1 ? 's' : ''} aux Titres likes.${alreadyMessage}${missingMessage}`)
+    }
   }
 
   useEffect(() => {

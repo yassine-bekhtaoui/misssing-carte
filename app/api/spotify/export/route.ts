@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     libraryUrl: 'https://open.spotify.com/collection/tracks',
     libraryUri: 'spotify:collection:tracks',
+    found: tracks.length,
     added: tracksToLike.length,
     alreadyAdded: tracks.length - tracksToLike.length,
     missing: missing.map(artist => ({ name: artist.name, song_name: artist.song_name })),
