@@ -24,7 +24,7 @@ export default function FavoritesPage() {
   const [spotifyLoading, setSpotifyLoading] = useState(false)
   const [spotifyMessage, setSpotifyMessage] = useState('')
 
-  const exportToSpotify = async (favoriteArtists = artists) => {
+  const exportToSpotify = async (favoriteArtists = artists, allowLoginRedirect = true) => {
     if (favoriteArtists.length === 0) return
 
     setSpotifyLoading(true)
@@ -37,6 +37,13 @@ export default function FavoritesPage() {
     })
 
     if (res.status === 401) {
+      if (!allowLoginRedirect) {
+        setSpotifyLoading(false)
+        sessionStorage.removeItem('spotify_export_pending')
+        setSpotifyMessage('Spotify demande une nouvelle autorisation. Cliquez une fois sur Spotify pour relancer la connexion.')
+        return
+      }
+
       sessionStorage.setItem('spotify_export_pending', '1')
       window.location.href = '/api/spotify/login?export=1'
       return
@@ -123,7 +130,7 @@ export default function FavoritesPage() {
       if (shouldExportToSpotify) {
         sessionStorage.removeItem('spotify_export_pending')
         window.history.replaceState({}, '', '/favoris')
-        exportToSpotify(nextArtists)
+        exportToSpotify(nextArtists, false)
       }
     }
 
