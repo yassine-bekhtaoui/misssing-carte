@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { GENRES } from '@/lib/genres'
 import { COUNTRIES } from '@/lib/countries'
 
@@ -23,6 +24,7 @@ interface DeezerTrack {
 }
 
 export default function ArtistForm() {
+  const router = useRouter()
   const [step, setStep] = useState<1 | 2 | 3>(1)
 
   const [artistQuery,   setArtistQuery]   = useState('')
@@ -131,15 +133,26 @@ export default function ArtistForm() {
           <p className="text-sm mb-6" style={{ color: 'var(--muted)' }}>
             Votre proposition sera visible sur le globe après validation par notre équipe.
           </p>
-          <button
-            onClick={resetForm}
-            className="font-bold px-6 py-3 rounded-xl transition-all"
-            style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--primary-hv)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--primary)')}
-          >
-            Ajouter un·e autre artiste
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={() => router.push('/')}
+              className="font-bold px-6 py-3 rounded-xl transition-all"
+              style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--primary-hv)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--primary)')}
+            >
+              Retour au globe
+            </button>
+            <button
+              onClick={resetForm}
+              className="font-bold px-6 py-3 rounded-xl transition-all"
+              style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
+            >
+              Ajouter un·e autre artiste
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -423,4 +436,3 @@ export default function ArtistForm() {
     </div>
   )
 }
-

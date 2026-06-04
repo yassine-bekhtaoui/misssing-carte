@@ -34,15 +34,43 @@ interface CountryGroup {
   lng: number
 }
 
+function applyGlobeMotionLock(globe: any) {
+  const controls = globe.controls()
+  controls.autoRotate = false
+  controls.autoRotateSpeed = 0
+  controls.enableDamping = false
+  controls.dampingFactor = 0
+}
+
+function lockGlobeMotion(globe: any) {
+  const controls = globe.controls()
+
+  const stopAutomaticMotion = () => {
+    applyGlobeMotionLock(globe)
+  }
+
+  controls.addEventListener?.('start', stopAutomaticMotion)
+  controls.addEventListener?.('change', stopAutomaticMotion)
+  controls.addEventListener?.('end', stopAutomaticMotion)
+  applyGlobeMotionLock(globe)
+
+  return () => {
+    controls.removeEventListener?.('start', stopAutomaticMotion)
+    controls.removeEventListener?.('change', stopAutomaticMotion)
+    controls.removeEventListener?.('end', stopAutomaticMotion)
+  }
+}
+
 export default function Globe() {
   const router = useRouter()
   const mountRef  = useRef<HTMLDivElement>(null)
   const globeRef  = useRef<any>(null)
+  const artistsSignatureRef = useRef('')
+  const pointOfViewRef = useRef<{ lat: number; lng: number; altitude: number } | null>(null)
   const onCountryClickRef = useRef<(g: CountryGroup) => void>(() => {})
 
   const [artists,         setArtists]         = useState<Artist[]>([])
   const [tooltip,         setTooltip]         = useState<Artist | null>(null)
-  const [selectedGenre,   setSelectedGenre]   = useState<string | null>(null)
   const [loading,         setLoading]         = useState(true)
   const [selectedCountry, setSelectedCountry] = useState<CountryGroup | null>(null)
   const [showGenrePanel,  setShowGenrePanel]  = useState(false)
@@ -55,7 +83,20 @@ export default function Globe() {
     fetch('/api/submit')
       .then(r => r.json())
       .then(data => {
-        setArtists(Array.isArray(data) ? data : [])
+        const nextArtists = Array.isArray(data) ? data : []
+        const nextSignature = JSON.stringify(nextArtists.map(a => ({
+          id: a.id,
+          name: a.name,
+          song_name: a.song_name,
+          country_code: a.country_code,
+          genre: a.genre,
+          status: a.status,
+          reviewed_at: a.reviewed_at,
+        })))
+        if (nextSignature !== artistsSignatureRef.current) {
+          artistsSignatureRef.current = nextSignature
+          setArtists(nextArtists)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -76,9 +117,7 @@ export default function Globe() {
   useEffect(() => {
     if (!mountRef.current || loading) return
 
-    const filtered = selectedGenre
-      ? artists.filter(a => a.genre === selectedGenre)
-      : artists
+    const filtered = artists
 
     // Group by country
     const byCountry = new Map<string, CountryGroup>()
@@ -172,7 +211,7 @@ export default function Globe() {
     let globe: any
     let destroyed = false
     let raf = -1
-    let stopTimer = -1 as unknown as ReturnType<typeof setTimeout>
+    let unlockControls = () => {}
     let removeListener = () => {}
 
     import('globe.gl').then(({ default: GlobeGL }) => {
@@ -209,26 +248,20 @@ export default function Globe() {
 
       // ── Point de vue initial centré sur le monde ───────────────────────
       const isMobile = window.innerWidth < 640
-      globe.pointOfView({ lat: 12, lng: 18, altitude: isMobile ? 3.25 : 2.25 }, 0)
+      globe.pointOfView(pointOfViewRef.current || { lat: 12, lng: 18, altitude: isMobile ? 3.25 : 2.25 }, 0)
 
       // ── Resize handler (orientation mobile, redimensionnement) ─────────
       const handleResize = () => {
         if (!mountRef.current || destroyed) return
-        const mobile = window.innerWidth < 640
         globe
           .width(mountRef.current.clientWidth)
           .height(mountRef.current.clientHeight)
-          .pointOfView({ lat: 12, lng: 18, altitude: mobile ? 3.25 : 2.25 }, 0)
+        applyGlobeMotionLock(globe)
       }
       window.addEventListener('resize', handleResize)
       window.visualViewport?.addEventListener('resize', handleResize)
 
-      // Tourne doucement à l'ouverture, s'arrête après 3s
-      globe.controls().autoRotate = true
-      globe.controls().autoRotateSpeed = 0.4
-      stopTimer = setTimeout(() => {
-        if (!destroyed) globe.controls().autoRotate = false
-      }, 3000)
+      unlockControls = lockGlobeMotion(globe)
       globeRef.current = globe
 
       // Cleanup resize listeners
@@ -258,24 +291,31 @@ export default function Globe() {
 
     return () => {
       destroyed = true
+      if (globe?.pointOfView) pointOfViewRef.current = globe.pointOfView()
+      unlockControls()
       removeListener()
-      clearTimeout(stopTimer)
       cancelAnimationFrame(raf)
       globeRef.current = null
       if (mountRef.current) mountRef.current.innerHTML = ''
     }
-  }, [artists, loading, selectedGenre])
+  }, [artists, loading])
 
   const genres = [...new Set(artists.map(a => a.genre))].sort()
 
   const flyToArtist = (artist: Artist) => {
     setShowGenrePanel(false)
     setPanelGenre(null)
-    setSelectedGenre(null)
     if (globeRef.current) {
-      globeRef.current.pointOfView({ lat: artist.lat, lng: artist.lng, altitude: 0.5 }, 1500)
+      pointOfViewRef.current = { lat: artist.lat, lng: artist.lng, altitude: 0.55 }
+      applyGlobeMotionLock(globeRef.current)
+      globeRef.current.pointOfView(pointOfViewRef.current, 900)
+      window.setTimeout(() => {
+        if (globeRef.current) applyGlobeMotionLock(globeRef.current)
+        setTooltip(artist)
+      }, 950)
+    } else {
+      setTooltip(artist)
     }
-    setTimeout(() => setTooltip(artist), 1600)
   }
 
   // ── JSX ────────────────────────────────────────────────────────────────────
@@ -297,7 +337,7 @@ export default function Globe() {
             onClick={() => {
               const next = !showGenrePanel
               setShowGenrePanel(next)
-              if (!next) { setPanelGenre(null); setSelectedGenre(null) }
+              if (!next) setPanelGenre(null)
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all w-full"
             style={{
@@ -316,6 +356,20 @@ export default function Globe() {
           {showGenrePanel && (
             <div className="mt-1 rounded-2xl overflow-hidden shadow-2xl"
                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '72vh', overflowY: 'auto' }}>
+              <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Genres</span>
+                <button
+                  onClick={() => { setShowGenrePanel(false); setPanelGenre(null) }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                  style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
+                  aria-label="Fermer les genres"
+                  title="Fermer"
+                >
+                  ×
+                </button>
+              </div>
 
               {/* Vue : liste des genres */}
               {!panelGenre && (
@@ -328,7 +382,7 @@ export default function Globe() {
                     return (
                       <button
                         key={g}
-                        onClick={() => { setPanelGenre(g); setSelectedGenre(g) }}
+                        onClick={() => setPanelGenre(g)}
                         className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 transition-all text-left"
                         style={{ background: 'transparent' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -352,7 +406,7 @@ export default function Globe() {
               {panelGenre && (
                 <div>
                   <button
-                    onClick={() => { setPanelGenre(null); setSelectedGenre(null) }}
+                    onClick={() => setPanelGenre(null)}
                     className="flex items-center gap-2 w-full px-4 py-3 text-sm font-semibold border-b transition-all"
                     style={{ color: 'var(--text)', borderColor: 'var(--border)' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}

@@ -2,6 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { COUNTRIES } from '@/lib/countries'
 
+type ArtistRow = {
+  deezer_track_id?: string | null
+  deezer_preview_url?: string | null
+  [key: string]: unknown
+}
+
+async function refreshPreviewUrl(artist: ArtistRow) {
+  if (!artist.deezer_track_id) return artist
+
+  try {
+    const res = await fetch(`https://api.deezer.com/track/${artist.deezer_track_id}`, {
+      cache: 'no-store',
+    })
+    if (!res.ok) return artist
+
+    const track = await res.json()
+    if (typeof track.preview !== 'string' || !track.preview) return artist
+
+    return {
+      ...artist,
+      deezer_preview_url: track.preview,
+    }
+  } catch {
+    return artist
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -64,7 +91,12 @@ export async function GET() {
       .order('submitted_at', { ascending: false })
 
     if (error) return NextResponse.json([])
-    return NextResponse.json(data)
+
+    const artistsWithFreshPreviews = await Promise.all(
+      (data || []).map(refreshPreviewUrl)
+    )
+
+    return NextResponse.json(artistsWithFreshPreviews)
   } catch {
     return NextResponse.json([])
   }

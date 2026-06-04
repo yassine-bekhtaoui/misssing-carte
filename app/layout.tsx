@@ -7,7 +7,7 @@ import Image from "next/image";
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "MISSING — Carte des artistes",
+  title: "MISS'SING — Carte des artistes",
   description: "Explorez les artistes féminines et minorités de genre dans la musique à travers le monde.",
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-shrink-0">
               <Image
                 src="/logo.jpg"
-                alt="MISSING"
+                alt="MISS'SING"
                 width={36}
                 height={36}
                 priority
