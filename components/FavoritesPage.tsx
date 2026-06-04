@@ -16,7 +16,6 @@ interface Artist {
   deezer_preview_url?: string
   deezer_track_id?: string
 }
-
 export default function FavoritesPage() {
   const [user, setUser] = useState<User | null>(null)
   const [artists, setArtists] = useState<Artist[]>([])
@@ -24,6 +23,18 @@ export default function FavoritesPage() {
   const [error, setError] = useState('')
   const [spotifyLoading, setSpotifyLoading] = useState(false)
   const [spotifyMessage, setSpotifyMessage] = useState('')
+
+  const openSpotifyPlaylist = (playlistUri?: string, playlistUrl?: string) => {
+    if (playlistUri) {
+      window.open(playlistUri, '_blank', 'noopener,noreferrer')
+    }
+
+    if (playlistUrl) {
+      window.setTimeout(() => {
+        window.open(playlistUrl, '_blank', 'noopener,noreferrer')
+      }, 500)
+    }
+  }
 
   const exportToSpotify = async (favoriteArtists = artists) => {
     if (favoriteArtists.length === 0) return
@@ -61,8 +72,8 @@ export default function FavoritesPage() {
     setSpotifyLoading(false)
     setSpotifyMessage(`${data.added} titre${data.added !== 1 ? 's' : ''} ajouté${data.added !== 1 ? 's' : ''}.`)
 
-    if (data.playlistUrl) {
-      window.location.href = data.playlistUrl
+    if (data.playlistUri || data.playlistUrl) {
+      openSpotifyPlaylist(data.playlistUri, data.playlistUrl)
     }
   }
 
@@ -246,4 +257,5 @@ export default function FavoritesPage() {
     </div>
   )
 }
+
 
