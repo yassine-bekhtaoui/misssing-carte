@@ -30,15 +30,23 @@ export default function AuthNav() {
 
   if (!user) {
     return (
-      <Link href="/connexion" className="nav-link text-sm font-medium hidden sm:block">
-        Connexion
+      <Link
+        href="/connexion"
+        className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+        style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
+      >
+        Compte
       </Link>
     )
   }
 
   return (
     <>
-      <Link href="/favoris" className="nav-link text-sm font-medium hidden sm:block">
+      <Link
+        href="/favoris"
+        className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+        style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
+      >
         Favoris
       </Link>
       <button
