@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { spotifyRedirectUri } from '@/lib/spotify'
 
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL('/favoris?spotify=auth-error', req.nextUrl.origin))
   }
 
-  const redirectUri = `${req.nextUrl.origin}/api/spotify/callback`
+  const redirectUri = spotifyRedirectUri(req)
   const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
   const tokenRes = await fetch(SPOTIFY_TOKEN_URL, {
     method: 'POST',

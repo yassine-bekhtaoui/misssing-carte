@@ -69,6 +69,17 @@ export default function FavoritesPage() {
     const load = async () => {
       setLoading(true)
       setError('')
+      const spotifyStatus = new URLSearchParams(window.location.search).get('spotify')
+
+      if (spotifyStatus === 'auth-error') {
+        sessionStorage.removeItem('spotify_export_pending')
+        setSpotifyMessage('Connexion Spotify interrompue. Relancez Spotify depuis le bouton quand vous voulez reessayer.')
+        window.history.replaceState({}, '', '/favoris')
+      } else if (spotifyStatus === 'missing-config') {
+        sessionStorage.removeItem('spotify_export_pending')
+        setSpotifyMessage('Spotify doit etre configure avant de pouvoir creer la playlist.')
+        window.history.replaceState({}, '', '/favoris')
+      }
 
       if (!hasSupabasePublicConfig()) {
         setError('Connexion indisponible: ajoutez NEXT_PUBLIC_SUPABASE_ANON_KEY dans les variables d’environnement.')
@@ -105,8 +116,9 @@ export default function FavoritesPage() {
       setArtists(nextArtists)
       setLoading(false)
 
-      if (sessionStorage.getItem('spotify_export_pending') === '1') {
+      if (spotifyStatus === 'connected' && sessionStorage.getItem('spotify_export_pending') === '1') {
         sessionStorage.removeItem('spotify_export_pending')
+        window.history.replaceState({}, '', '/favoris')
         exportToSpotify(nextArtists)
       }
     }
