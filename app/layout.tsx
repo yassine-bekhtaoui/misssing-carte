@@ -27,7 +27,7 @@ export default function RootLayout({
     <html lang="fr" className="h-full w-full">
       <body className={`${dmSans.className} h-full flex flex-col`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
         <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(12,11,22,0.92)', backdropFilter: 'blur(14px)', borderColor: 'var(--border)' }}>
-          <div className="max-w-6xl mx-auto px-3 h-14 flex items-center justify-between gap-2">
+          <div className="max-w-6xl mx-auto px-3 h-14 flex items-center justify-between gap-2 overflow-hidden">
 
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-shrink-0">
               <Image
@@ -53,12 +53,12 @@ export default function RootLayout({
               </span>
             </Link>
 
-            <div className="flex gap-2 items-center flex-shrink-0">
+            <div className="flex gap-1.5 sm:gap-2 items-center flex-shrink-0 min-w-0">
               <Link href="/" className="nav-link text-sm font-medium hidden sm:block">Globe</Link>
               <AuthNav />
               <Link
                 href="/proposer"
-                className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+                className="tap-target text-sm font-semibold px-3 py-2 rounded-full transition-all whitespace-nowrap flex items-center justify-center"
                 style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
               >
                 + Proposer

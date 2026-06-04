@@ -136,7 +136,7 @@ export default function ArtistForm() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => router.push('/')}
-              className="font-bold px-6 py-3 rounded-xl transition-all"
+              className="tap-target font-bold px-6 py-3 rounded-xl transition-all"
               style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--primary-hv)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'var(--primary)')}
@@ -145,7 +145,7 @@ export default function ArtistForm() {
             </button>
             <button
               onClick={resetForm}
-              className="font-bold px-6 py-3 rounded-xl transition-all"
+              className="tap-target font-bold px-6 py-3 rounded-xl transition-all"
               style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -173,8 +173,8 @@ export default function ArtistForm() {
   }
 
   return (
-    <div className="min-h-screen p-4 flex items-start justify-center" style={{ background: 'var(--bg)' }}>
-      <div className="w-full max-w-lg mt-8">
+    <div className="min-h-screen p-3 sm:p-4 flex items-start justify-center" style={{ background: 'var(--bg)' }}>
+      <div className="w-full max-w-lg mt-5 sm:mt-8">
         <h1 className="text-2xl font-bold text-white mb-2 text-center">Proposer un·e artiste</h1>
         <p className="text-sm text-center mb-8" style={{ color: 'var(--muted)' }}>
           Votre suggestion sera validée par notre équipe avant d&apos;apparaître sur le globe.
@@ -198,7 +198,7 @@ export default function ArtistForm() {
 
         {/* ── Étape 1 : Artiste ─────────────────────────────────────────── */}
         {step === 1 && (
-          <div className="rounded-2xl p-6" style={{ background: 'var(--surface)' }}>
+          <div className="rounded-2xl p-4 sm:p-6" style={{ background: 'var(--surface)' }}>
             <h2 className="text-lg font-semibold text-white mb-4">1. Rechercher l&apos;artiste</h2>
             <input
               type="text"
@@ -217,7 +217,7 @@ export default function ArtistForm() {
                   <button
                     key={a.id}
                     onClick={() => { setSelectedArtist(a); setArtistQuery(a.name); setArtistResults([]) }}
-                    className="w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
+                    className="tap-target w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
                     style={{ background: 'var(--surface2)' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -244,13 +244,13 @@ export default function ArtistForm() {
                   <div className="text-xs" style={{ color: 'var(--muted2)' }}>Artiste sélectionné·e</div>
                 </div>
                 <button onClick={() => { setSelectedArtist(null); setArtistQuery('') }}
-                        className="hover:opacity-60 transition-opacity" style={{ color: 'var(--muted2)' }}>✕</button>
+                        className="tap-target w-11 h-11 rounded-full hover:opacity-60 transition-opacity flex items-center justify-center" style={{ color: 'var(--muted2)', background: 'var(--surface2)' }}>✕</button>
               </div>
             )}
             <button
               disabled={!selectedArtist}
               onClick={() => setStep(2)}
-              className="mt-4 w-full font-bold py-3 rounded-xl transition-all"
+              className="tap-target mt-4 w-full font-bold py-3 rounded-xl transition-all"
               style={{
                 background: selectedArtist ? 'var(--primary)' : 'var(--surface2)',
                 color: selectedArtist ? 'var(--on-primary)'           : 'var(--muted2)',
@@ -263,7 +263,7 @@ export default function ArtistForm() {
 
         {/* ── Étape 2 : Morceau ─────────────────────────────────────────── */}
         {step === 2 && (
-          <div className="rounded-2xl p-6" style={{ background: 'var(--surface)' }}>
+          <div className="rounded-2xl p-4 sm:p-6" style={{ background: 'var(--surface)' }}>
             <h2 className="text-lg font-semibold text-white mb-1">2. Choisir un morceau</h2>
             <p className="text-sm mb-4" style={{ color: 'var(--muted)' }}>
               de <span className="font-medium" style={{ color: 'var(--primary-hv)' }}>{selectedArtist?.name}</span>
@@ -285,7 +285,7 @@ export default function ArtistForm() {
                   <button
                     key={t.id}
                     onClick={() => { setSelectedTrack(t); setTrackResults([]) }}
-                    className="w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
+                    className="tap-target w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
                     style={{ background: 'var(--surface2)' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -320,19 +320,19 @@ export default function ArtistForm() {
                   <div className="font-bold" style={{ color: 'var(--primary-hv)' }}>{selectedTrack.title}</div>
                   <div className="text-xs" style={{ color: 'var(--muted2)' }}>{selectedTrack.album?.title}</div>
                 </div>
-                <button onClick={() => setSelectedTrack(null)} className="hover:opacity-60" style={{ color: 'var(--muted2)' }}>✕</button>
+                <button onClick={() => setSelectedTrack(null)} className="tap-target w-11 h-11 rounded-full hover:opacity-60 flex items-center justify-center" style={{ color: 'var(--muted2)', background: 'var(--surface2)' }}>✕</button>
               </div>
             )}
-            <div className="flex gap-3 mt-4">
+            <div className="flex flex-col sm:flex-row gap-3 mt-4">
               <button onClick={() => setStep(1)}
-                      className="flex-1 font-bold py-3 rounded-xl transition-all"
+                      className="tap-target flex-1 font-bold py-3 rounded-xl transition-all"
                       style={{ background: 'var(--surface2)', color: 'var(--muted)' }}>
                 ← Retour
               </button>
               <button
                 disabled={!selectedTrack}
                 onClick={() => setStep(3)}
-                className="flex-1 font-bold py-3 rounded-xl transition-all"
+                className="tap-target flex-1 font-bold py-3 rounded-xl transition-all"
                 style={{
                   background: selectedTrack ? 'var(--primary)' : 'var(--surface2)',
                   color: selectedTrack ? 'var(--on-primary)'           : 'var(--muted2)',
@@ -346,7 +346,7 @@ export default function ArtistForm() {
 
         {/* ── Étape 3 : Pays + Genre + Contexte ─────────────────────────── */}
         {step === 3 && (
-          <div className="rounded-2xl p-6" style={{ background: 'var(--surface)' }}>
+          <div className="rounded-2xl p-4 sm:p-6" style={{ background: 'var(--surface)' }}>
             <h2 className="text-lg font-semibold text-white mb-4">3. Pays d&apos;origine et genre</h2>
 
             <label className="block text-sm mb-2" style={{ color: 'var(--muted)' }}>Pays d&apos;origine</label>
@@ -365,12 +365,12 @@ export default function ArtistForm() {
             </select>
 
             <label className="block text-sm mb-2" style={{ color: 'var(--muted)' }}>Genre musical</label>
-            <div className="grid grid-cols-2 gap-2 mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
               {GENRES.map(g => (
                 <button
                   key={g}
                   onClick={() => setGenre(g)}
-                  className="py-2 px-3 rounded-xl text-sm font-medium border transition-all text-left"
+                  className="tap-target py-3 px-3 rounded-xl text-sm font-medium border transition-all text-left"
                   style={{
                     background:  genre === g ? 'var(--primary)' : 'var(--surface2)',
                     borderColor: genre === g ? 'var(--primary)' : 'rgba(255,255,255,0.08)',
@@ -412,16 +412,16 @@ export default function ArtistForm() {
 
             {error && <p className="text-sm mb-4 text-center" style={{ color: '#f87171' }}>{error}</p>}
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button onClick={() => setStep(2)}
-                      className="flex-1 font-bold py-3 rounded-xl transition-all"
+                      className="tap-target flex-1 font-bold py-3 rounded-xl transition-all"
                       style={{ background: 'var(--surface2)', color: 'var(--muted)' }}>
                 ← Retour
               </button>
               <button
                 disabled={!country || !genre || submitting}
                 onClick={handleSubmit}
-                className="flex-1 font-bold py-3 rounded-xl transition-all"
+                className="tap-target flex-1 font-bold py-3 rounded-xl transition-all"
                 style={{
                   background: country && genre && !submitting ? 'var(--primary)' : 'var(--surface2)',
                   color: country && genre && !submitting ? 'var(--on-primary)'           : 'var(--muted2)',

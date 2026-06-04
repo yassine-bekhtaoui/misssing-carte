@@ -32,7 +32,7 @@ export default function AuthNav() {
     return (
       <Link
         href="/connexion"
-        className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+        className="tap-target text-sm font-semibold px-3 py-2 rounded-full transition-all whitespace-nowrap flex items-center justify-center"
         style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
       >
         Compte
@@ -44,7 +44,7 @@ export default function AuthNav() {
     <>
       <Link
         href="/favoris"
-        className="text-sm font-semibold px-3 py-1.5 rounded-full transition-all whitespace-nowrap"
+        className="tap-target text-sm font-semibold px-3 py-2 rounded-full transition-all whitespace-nowrap flex items-center justify-center"
         style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
       >
         Favoris

@@ -409,7 +409,7 @@ export default function Globe() {
 
       {/* ── Panneau recherche par genre ───────────────────────────────── */}
       {genres.length > 0 && (
-        <div className="absolute top-4 left-2 right-2 z-20 sm:left-4 sm:right-auto" style={{ width: 'min(264px, calc(100vw - 16px))' }}>
+        <div className="absolute top-3 left-2 right-2 z-20 sm:top-4 sm:left-4 sm:right-auto" style={{ width: 'min(440px, calc(100vw - 16px))' }}>
           {/* Bouton déclencheur */}
           <button
             onClick={() => {
@@ -417,7 +417,7 @@ export default function Globe() {
               setShowGenrePanel(next)
               if (!next) setPanelGenre(null)
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all w-full"
+            className="tap-target flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-all w-full"
             style={{
               background:  showGenrePanel ? 'var(--primary)' : 'rgba(22,20,40,0.90)',
               color:       showGenrePanel ? 'var(--on-primary)' : 'var(--text)',
@@ -433,12 +433,12 @@ export default function Globe() {
           {/* Panneau */}
           {showGenrePanel && (
             <div className="mt-1 rounded-2xl overflow-hidden shadow-2xl"
-                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: '72vh', overflowY: 'auto' }}>
+                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', maxHeight: 'min(72dvh, 520px)', overflowY: 'auto' }}>
               <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
                 <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Genres</span>
                 <button
                   onClick={() => { setShowGenrePanel(false); setPanelGenre(null) }}
-                  className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                  className="tap-target w-11 h-11 rounded-full flex items-center justify-center transition-all"
                   style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -461,7 +461,7 @@ export default function Globe() {
                       <button
                         key={g}
                         onClick={() => setPanelGenre(g)}
-                        className="w-full flex items-center justify-between rounded-xl px-3 py-2.5 transition-all text-left"
+                        className="tap-target w-full flex items-center justify-between rounded-xl px-3 py-3 transition-all text-left"
                         style={{ background: 'transparent' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -485,7 +485,7 @@ export default function Globe() {
                 <div>
                   <button
                     onClick={() => setPanelGenre(null)}
-                    className="flex items-center gap-2 w-full px-4 py-3 text-sm font-semibold border-b transition-all"
+                    className="tap-target flex items-center gap-2 w-full px-4 py-3 text-sm font-semibold border-b transition-all"
                     style={{ color: 'var(--text)', borderColor: 'var(--border)' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -499,7 +499,7 @@ export default function Globe() {
                       <button
                         key={a.id}
                         onClick={() => flyToArtist(a)}
-                        className="w-full flex items-center gap-3 rounded-xl p-2.5 transition-all text-left"
+                        className="tap-target w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
                         style={{ background: 'transparent' }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -529,7 +529,7 @@ export default function Globe() {
       )}
 
       {/* Compteur */}
-      <div className="absolute bottom-8 left-4 text-xs z-20" style={{ color: 'var(--muted2)' }}>
+      <div className="absolute bottom-8 left-3 text-xs z-20 sm:left-4" style={{ color: 'var(--muted2)' }}>
         {artists.length} artiste{artists.length !== 1 ? 's' : ''} sur la carte
       </div>
 
@@ -571,7 +571,7 @@ export default function Globe() {
             target="_blank"
             rel="noopener noreferrer"
             title={label}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+            className="tap-target w-11 h-11 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all"
             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', color: 'var(--muted)' }}
             onMouseEnter={e => {
               e.currentTarget.style.background = 'rgba(203,199,236,0.15)'
@@ -590,7 +590,7 @@ export default function Globe() {
       {/* Engrenage admin */}
       <button
         onClick={() => router.push('/admin')}
-        className="absolute right-4 w-10 h-10 rounded-full flex items-center justify-center transition-all z-20"
+        className="tap-target absolute right-3 sm:right-4 w-11 h-11 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all z-20"
         style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', bottom: 'max(32px, env(safe-area-inset-bottom, 32px))' }}
         title="Accès administration"
       >
@@ -609,7 +609,7 @@ export default function Globe() {
           onClick={() => setSelectedCountry(null)}
         >
           <div
-            className="rounded-2xl p-5 max-w-sm w-full mx-4 shadow-2xl"
+            className="rounded-2xl p-4 sm:p-5 max-w-sm w-full mx-3 sm:mx-4 shadow-2xl max-h-[calc(100dvh-6rem)] overflow-y-auto"
             style={{ background: 'var(--surface)', border: '1px solid rgba(212,226,0,0.2)' }}
             onClick={e => e.stopPropagation()}
           >
@@ -620,14 +620,14 @@ export default function Globe() {
                   {selectedCountry.artists.length} artiste{selectedCountry.artists.length !== 1 ? 's' : ''}
                 </p>
               </div>
-              <button onClick={() => setSelectedCountry(null)} className="text-xl leading-none transition-opacity hover:opacity-60" style={{ color: 'var(--muted)' }}>✕</button>
+              <button onClick={() => setSelectedCountry(null)} className="tap-target w-11 h-11 rounded-full text-xl leading-none transition-opacity hover:opacity-60 flex items-center justify-center" style={{ color: 'var(--muted)', background: 'var(--surface2)' }}>✕</button>
             </div>
             <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
               {selectedCountry.artists.map(a => (
                 <button
                   key={a.id}
                   onClick={() => { setTooltip(a); setSelectedCountry(null) }}
-                  className="w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
+                  className="tap-target w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
                   style={{ background: 'var(--surface2)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
@@ -658,7 +658,7 @@ export default function Globe() {
              style={{ background: 'rgba(8,0,6,0.6)', backdropFilter: 'blur(4px)' }}
              onClick={() => setTooltip(null)}>
           <div
-            className="rounded-2xl p-5 max-w-sm w-full mx-4 shadow-2xl"
+            className="rounded-2xl p-4 sm:p-5 max-w-sm w-full mx-3 sm:mx-4 shadow-2xl max-h-[calc(100dvh-6rem)] overflow-y-auto"
             style={{
               background:  'var(--surface)',
               border:      `1px solid ${GENRE_COLORS[tooltip.genre] || 'rgba(255,255,255,0.15)'}40`,
@@ -682,8 +682,8 @@ export default function Globe() {
                 <div className="text-sm mt-1 truncate" style={{ color: 'var(--text)' }}>♪ {tooltip.song_name}</div>
                 <div className="text-xs mt-1" style={{ color: 'var(--muted)' }}>📍 {tooltip.country_name}</div>
               </div>
-              <button onClick={() => setTooltip(null)} className="leading-none hover:opacity-60 transition-opacity flex-shrink-0"
-                      style={{ color: 'var(--muted2)' }}>✕</button>
+              <button onClick={() => setTooltip(null)} className="tap-target w-11 h-11 rounded-full leading-none hover:opacity-60 transition-opacity flex-shrink-0 flex items-center justify-center"
+                      style={{ color: 'var(--muted2)', background: 'var(--surface2)' }}>✕</button>
             </div>
 
             {/* Genre tag */}
@@ -697,7 +697,7 @@ export default function Globe() {
             <button
               onClick={() => toggleFavorite(tooltip)}
               disabled={favoriteBusy}
-              className="w-full mb-3 rounded-xl px-4 py-2.5 text-sm font-bold transition-all"
+              className="tap-target w-full mb-3 rounded-xl px-4 py-3 text-sm font-bold transition-all"
               style={{
                 background: favoriteIds.has(tooltip.id) ? 'rgba(200,216,0,0.16)' : 'var(--surface2)',
                 color: favoriteIds.has(tooltip.id) ? 'var(--primary)' : 'var(--text)',
@@ -732,7 +732,7 @@ export default function Globe() {
             {tooltip.deezer_preview_url ? (
               <div className="mt-1">
                 <p className="text-xs mb-1.5" style={{ color: 'var(--muted2)' }}>🎧 Aperçu (30s)</p>
-                <audio controls className="w-full h-8 rounded-lg" src={tooltip.deezer_preview_url} />
+                <audio controls className="w-full h-10 rounded-lg" src={tooltip.deezer_preview_url} />
               </div>
             ) : (
               <p className="text-xs mt-2 text-center" style={{ color: 'var(--muted2)' }}>

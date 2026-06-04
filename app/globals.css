@@ -28,6 +28,40 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  button,
+  a[role="button"],
+  .tap-target {
+    min-height: 44px;
+  }
+}
+
 .nav-link { color: var(--muted); transition: color 0.2s; }
 .nav-link:hover { color: var(--text); }
 
