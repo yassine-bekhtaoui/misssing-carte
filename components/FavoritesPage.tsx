@@ -198,11 +198,6 @@ export default function FavoritesPage() {
 
   const openSpotifySearch = (artist: Artist) => {
     window.location.href = spotifyAppSearchUrl(artist)
-    window.setTimeout(() => {
-      if (document.visibilityState === 'visible') {
-        window.open(spotifySearchUrl(artist), '_blank', 'noopener,noreferrer')
-      }
-    }, 900)
   }
 
   if (loading) {
