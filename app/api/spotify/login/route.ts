@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { spotifyAppOrigin, spotifyRedirectUri } from '@/lib/spotify'
 
 const SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
-const SCOPES = ['playlist-modify-private', 'playlist-modify-public'].join(' ')
+const SCOPES = ['playlist-modify-private', 'playlist-modify-public', 'playlist-read-private'].join(' ')
 
 function randomState() {
   return crypto.randomUUID()

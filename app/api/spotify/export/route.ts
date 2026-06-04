@@ -9,6 +9,7 @@ interface ExportArtist {
 }
 
 const SPOTIFY_API = 'https://api.spotify.com/v1'
+const PLAYLIST_NAME = "MISS'SING - Mes favoris"
 
 async function spotifyFetch(path: string, token: string, init: RequestInit = {}) {
   return fetch(`${SPOTIFY_API}${path}`, {
@@ -37,6 +38,42 @@ function uniqueValues(values: string[]) {
   return [...new Set(values)]
 }
 
+async function getExistingPlaylist(token: string, userId: string) {
+  let nextPath: string | null = '/me/playlists?limit=50'
+
+  while (nextPath) {
+    const playlistsRes = await spotifyFetch(nextPath, token)
+    if (!playlistsRes.ok) return { error: playlistsRes }
+
+    const playlists = await playlistsRes.json()
+    const playlist = playlists.items?.find((item: any) => item?.name === PLAYLIST_NAME && item?.owner?.id === userId)
+    if (playlist) return { playlist }
+
+    nextPath = playlists.next ? playlists.next.replace(SPOTIFY_API, '') : null
+  }
+
+  return { playlist: null }
+}
+
+async function getPlaylistTrackUris(token: string, playlistId: string) {
+  const uris = new Set<string>()
+  let nextPath: string | null = `/playlists/${playlistId}/items?fields=items(track(uri)),next&limit=100`
+
+  while (nextPath) {
+    const itemsRes = await spotifyFetch(nextPath, token)
+    if (!itemsRes.ok) return { error: itemsRes }
+
+    const items = await itemsRes.json()
+    for (const item of items.items || []) {
+      if (item?.track?.uri) uris.add(item.track.uri)
+    }
+
+    nextPath = items.next ? items.next.replace(SPOTIFY_API, '') : null
+  }
+
+  return { uris }
+}
+
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
   const token = cookieStore.get('spotify_access_token')?.value
@@ -61,7 +98,17 @@ export async function POST(req: NextRequest) {
   }
   const me = await meRes.json()
 
-  const playlistRes = await spotifyFetch('/me/playlists', token, {
+  const existingPlaylist = await getExistingPlaylist(token, me.id)
+  if (existingPlaylist.error) {
+    if ([401, 403].includes(existingPlaylist.error.status)) {
+      return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
+    }
+    return spotifyError(existingPlaylist.error, 'playlist_lookup_failed')
+  }
+
+  let playlist = existingPlaylist.playlist
+  if (!playlist) {
+    const playlistRes = await spotifyFetch('/me/playlists', token, {
     method: 'POST',
     body: JSON.stringify({
       name: "MISS'SING - Mes favoris",
@@ -70,11 +117,12 @@ export async function POST(req: NextRequest) {
     }),
   })
 
-  if (!playlistRes.ok) {
-    return spotifyError(playlistRes, 'playlist_failed')
-  }
+    if (!playlistRes.ok) {
+      return spotifyError(playlistRes, 'playlist_failed')
+    }
 
-  const playlist = await playlistRes.json()
+    playlist = await playlistRes.json()
+  }
   const foundUris: string[] = []
   const missing: ExportArtist[] = []
 
@@ -93,10 +141,21 @@ export async function POST(req: NextRequest) {
   }
 
   const uris = uniqueValues(foundUris)
-  if (uris.length > 0) {
+  const playlistTracks = await getPlaylistTrackUris(token, playlist.id)
+  if (playlistTracks.error) {
+    if ([401, 403].includes(playlistTracks.error.status)) {
+      return NextResponse.json({ error: 'spotify_not_connected' }, { status: 401 })
+    }
+    return spotifyError(playlistTracks.error, 'playlist_tracks_failed')
+  }
+
+  const existingUris = playlistTracks.uris || new Set<string>()
+  const urisToAdd = uris.filter(uri => !existingUris.has(uri))
+
+  for (let i = 0; i < urisToAdd.length; i += 100) {
     const addRes = await spotifyFetch(`/playlists/${playlist.id}/items`, token, {
       method: 'POST',
-      body: JSON.stringify({ uris }),
+      body: JSON.stringify({ uris: urisToAdd.slice(i, i + 100) }),
     })
 
     if (!addRes.ok) {
@@ -107,7 +166,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     playlistUrl: playlist.external_urls?.spotify,
     playlistUri: playlist.uri,
-    added: uris.length,
+    added: urisToAdd.length,
+    alreadyAdded: uris.length - urisToAdd.length,
     missing: missing.map(artist => ({ name: artist.name, song_name: artist.song_name })),
   })
 }
