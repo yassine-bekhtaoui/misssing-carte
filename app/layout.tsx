@@ -4,18 +4,37 @@ import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
 import AuthNav from "@/components/AuthNav";
+import PwaRegistration from "@/components/PwaRegistration";
 
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "MISS'SING — Carte des artistes",
   description: "Explorez les artistes féminines et minorités de genre dans la musique à travers le monde.",
+  applicationName: "MISS'SING",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "MISS'SING",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",   // iOS safe area support
+  themeColor: "#0c0b16",
 };
 
 export default function RootLayout({
@@ -26,6 +45,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="h-full w-full">
       <body className={`${dmSans.className} h-full flex flex-col`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+        <PwaRegistration />
         <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(12,11,22,0.92)', backdropFilter: 'blur(14px)', borderColor: 'var(--border)' }}>
           <div className="max-w-6xl mx-auto px-3 h-14 flex items-center justify-between gap-2 overflow-hidden">
 
