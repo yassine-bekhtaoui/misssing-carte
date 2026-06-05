@@ -1,9 +1,7 @@
-const CACHE_NAME = "misssing-pwa-v1";
+const CACHE_NAME = "misssing-pwa-v2";
 
 const APP_SHELL = [
   "/",
-  "/favoris",
-  "/proposer",
   "/logo.jpg",
   "/icon-192.png",
   "/icon-512.png",
@@ -40,6 +38,11 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith("/favoris")) return;
+  if (url.pathname.startsWith("/connexion")) return;
+  if (url.pathname.startsWith("/admin")) return;
+  if (url.searchParams.has("code")) return;
+  if (url.searchParams.has("access_token")) return;
 
   event.respondWith(
     fetch(request)

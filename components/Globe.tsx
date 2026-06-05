@@ -189,35 +189,40 @@ export default function Globe() {
         'display:flex',
         'flex-direction:column',
         'align-items:center',
-        'gap:3px',
+        'gap:4px',
         'opacity:0',
         'transition:opacity 0.4s ease',
         'pointer-events:auto',
+        'transform:translateZ(0)',
+        '-webkit-font-smoothing:antialiased',
+        'backface-visibility:hidden',
       ].join(';')
 
       const badge = document.createElement('div')
       badge.textContent = String(group.artists.length)
       badge.style.cssText = [
-        'background:#c8d800',
+        'background:linear-gradient(135deg,#e8f000 0%,#c8d800 55%,#9dd300 100%)',
         'color:#0c0b16',
-        'border-radius:50%',
-        'min-width:22px',
-        'height:22px',
-        'padding:0 4px',
+        'border-radius:999px',
+        'min-width:34px',
+        'height:34px',
+        'padding:0 8px',
         'display:flex',
         'align-items:center',
         'justify-content:center',
-        'font-size:10px',
-        'font-weight:700',
+        'font-size:12px',
+        'font-weight:800',
+        'line-height:1',
         'cursor:pointer',
-        'box-shadow:0 0 10px rgba(200,216,0,0.6)',
+        'box-shadow:0 10px 24px rgba(0,0,0,0.35),0 0 0 3px rgba(160,40,210,0.95),0 0 18px rgba(200,216,0,0.45)',
         'transition:transform 0.15s',
         'user-select:none',
-        'border:1px solid rgba(255,255,255,0.15)',
+        'border:1px solid rgba(255,255,255,0.45)',
         'pointer-events:auto',
+        'text-rendering:geometricPrecision',
       ].join(';')
 
-      badge.addEventListener('mouseover', () => { badge.style.transform = 'scale(1.3)' })
+      badge.addEventListener('mouseover', () => { badge.style.transform = 'scale(1.12)' })
       badge.addEventListener('mouseout',  () => { badge.style.transform = 'scale(1)' })
       badge.addEventListener('click', e => {
         e.stopPropagation()
@@ -228,14 +233,20 @@ export default function Globe() {
       const nameEl = document.createElement('div')
       nameEl.textContent = group.name
       nameEl.style.cssText = [
-        'color:rgba(255,247,251,0.75)',
-        'font-size:9px',
-        'font-weight:600',
+        'color:rgba(255,247,251,0.95)',
+        'background:rgba(12,11,22,0.68)',
+        'border:1px solid rgba(255,255,255,0.12)',
+        'border-radius:999px',
+        'padding:2px 7px',
+        'font-size:10px',
+        'font-weight:700',
+        'line-height:1.15',
         'white-space:nowrap',
-        'text-shadow:0 1px 3px rgba(0,0,0,0.95)',
+        'text-shadow:0 1px 2px rgba(0,0,0,0.9)',
         'pointer-events:none',
         'user-select:none',
-        'letter-spacing:0.5px',
+        'letter-spacing:0',
+        'text-rendering:geometricPrecision',
       ].join(';')
 
       wrapper.appendChild(badge)
@@ -263,7 +274,8 @@ export default function Globe() {
         .pointLat('lat')
         .pointLng('lng')
         .pointColor((d: any) => GENRE_COLORS[d.genre] || '#c8d800')
-        .pointRadius(0.45)
+        .pointRadius(0.55)
+        .pointResolution(24)
         .pointAltitude(0.02)
         .pointLabel((d: any) => `
           <div style="background:rgba(8,0,6,0.9);border:1px solid ${GENRE_COLORS[d.genre] || '#c8d800'};border-radius:8px;padding:6px 10px;max-width:180px;">
