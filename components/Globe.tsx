@@ -221,6 +221,7 @@ export default function Globe() {
       badge.addEventListener('mouseout',  () => { badge.style.transform = 'scale(1)' })
       badge.addEventListener('click', e => {
         e.stopPropagation()
+        setTooltip(null)
         onCountryClickRef.current(group)
       })
 
@@ -271,7 +272,18 @@ export default function Globe() {
             <div style="color:#b9a6b2;font-size:10px;margin-top:2px;">📍 ${d.country_name}</div>
           </div>
         `)
-        .onPointClick((d: any) => setTooltip(d as Artist))
+        .onPointClick((d: any) => {
+          const artist = d as Artist
+          const countryGroup = byCountry.get(artist.country_name)
+          if (countryGroup && countryGroup.artists.length > 1) {
+            setTooltip(null)
+            setSelectedCountry(countryGroup)
+            return
+          }
+
+          setSelectedCountry(null)
+          setTooltip(artist)
+        })
         // ── Labels HTML continents + badges pays ────────────────────────
         .htmlElementsData(allEls)
         .htmlElement((d: any) => d.el)
