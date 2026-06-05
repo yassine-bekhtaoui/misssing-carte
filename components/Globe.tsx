@@ -284,7 +284,7 @@ export default function Globe() {
 
       // ── Point de vue initial centré sur le monde ───────────────────────
       const isMobile = window.innerWidth < 640
-      globe.pointOfView(pointOfViewRef.current || { lat: 12, lng: 18, altitude: isMobile ? 3.25 : 2.25 }, 0)
+      globe.pointOfView(pointOfViewRef.current || { lat: 12, lng: 18, altitude: isMobile ? 3.65 : 2.25 }, 0)
 
       // ── Resize handler (orientation mobile, redimensionnement) ─────────
       const handleResize = () => {
@@ -409,7 +409,7 @@ export default function Globe() {
 
       {/* ── Panneau recherche par genre ───────────────────────────────── */}
       {genres.length > 0 && (
-        <div className="absolute top-3 left-2 right-2 z-20 sm:top-4 sm:left-4 sm:right-auto" style={{ width: 'min(440px, calc(100vw - 16px))' }}>
+        <div className="absolute top-2.5 left-2 right-2 z-20 sm:top-4 sm:left-4 sm:right-auto" style={{ width: 'min(440px, calc(100vw - 16px))' }}>
           {/* Bouton déclencheur */}
           <button
             onClick={() => {

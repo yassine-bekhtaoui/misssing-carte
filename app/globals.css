@@ -62,6 +62,12 @@ textarea {
   }
 }
 
+@media (display-mode: standalone) {
+  body {
+    min-height: 100dvh;
+  }
+}
+
 .nav-link { color: var(--muted); transition: color 0.2s; }
 .nav-link:hover { color: var(--text); }
 

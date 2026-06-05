@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "MISS'SING",
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "black",
   },
   formatDetection: {
     telephone: false,
@@ -46,15 +46,23 @@ export default function RootLayout({
     <html lang="fr" className="h-full w-full">
       <body className={`${dmSans.className} h-full flex flex-col`} style={{ background: 'var(--bg)', color: 'var(--text)' }}>
         <PwaRegistration />
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(12,11,22,0.92)', backdropFilter: 'blur(14px)', borderColor: 'var(--border)' }}>
-          <div className="max-w-6xl mx-auto px-3 h-14 flex items-center justify-between gap-2 overflow-hidden">
+        <nav
+          className="fixed top-0 left-0 right-0 z-50 border-b"
+          style={{
+            background: 'rgba(12,11,22,0.92)',
+            backdropFilter: 'blur(14px)',
+            borderColor: 'var(--border)',
+            paddingTop: 'env(safe-area-inset-top)',
+          }}
+        >
+          <div className="max-w-6xl mx-auto px-2.5 sm:px-3 h-14 flex items-center justify-between gap-1.5 sm:gap-2 overflow-hidden">
 
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-shrink-0">
               <Image
                 src="/logo.jpg"
                 alt="MISS'SING"
-                width={36}
-                height={36}
+                width={34}
+                height={34}
                 priority
                 style={{ borderRadius: '8px', objectFit: 'cover', flexShrink: 0 }}
               />
@@ -78,7 +86,7 @@ export default function RootLayout({
               <AuthNav />
               <Link
                 href="/proposer"
-                className="tap-target text-sm font-semibold px-3 py-2 rounded-full transition-all whitespace-nowrap flex items-center justify-center"
+                className="tap-target text-sm font-semibold px-2.5 sm:px-3 py-2 rounded-full transition-all whitespace-nowrap flex items-center justify-center"
                 style={{ background: 'var(--primary)', color: 'var(--on-primary)' }}
               >
                 + Proposer
@@ -86,7 +94,7 @@ export default function RootLayout({
             </div>
           </div>
         </nav>
-        <div className="pt-14 flex-1 flex flex-col relative">{children}</div>
+        <div className="flex-1 flex flex-col relative" style={{ paddingTop: 'calc(3.5rem + env(safe-area-inset-top))' }}>{children}</div>
       </body>
     </html>
   );
