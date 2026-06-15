@@ -38,6 +38,7 @@ export default function ArtistForm() {
   const [trackLoading, setTrackLoading] = useState(false)
 
   const [country,     setCountry]     = useState('')
+  const [origins,     setOrigins]     = useState('')
   const [genre,       setGenre]       = useState('')
   const [reason,      setReason]      = useState('')
   const [submittedBy, setSubmittedBy] = useState('')
@@ -93,6 +94,7 @@ export default function ArtistForm() {
           deezerTrackId:    String(selectedTrack.id),
           deezerPreviewUrl: selectedTrack.preview,
           countryCode:      country,
+          origins:          origins.trim() || undefined,
           genre,
           reason:           reason.trim()      || undefined,
           submittedBy:      submittedBy.trim() || undefined,
@@ -116,6 +118,7 @@ export default function ArtistForm() {
     setArtistQuery(''); setSelectedArtist(null)
     setTrackQuery('');  setSelectedTrack(null)
     setCountry('');     setGenre('')
+    setOrigins('')
     setReason('');      setSubmittedBy('')
   }
 
@@ -363,6 +366,20 @@ export default function ArtistForm() {
                 <option key={c.code} value={c.code}>{c.name}</option>
               ))}
             </select>
+
+            <label className="block text-sm mb-2" style={{ color: 'var(--muted)' }}>
+              Origines <span style={{ color: 'var(--muted2)' }}>(facultatif)</span>
+            </label>
+            <input
+              type="text"
+              value={origins}
+              onChange={e => setOrigins(e.target.value)}
+              placeholder="Ex. Maroc / France, Guadeloupe..."
+              className={`${inputCls} mb-4`}
+              style={inputStyle}
+              onFocus={inputFocus}
+              onBlur={inputBlur}
+            />
 
             <label className="block text-sm mb-2" style={{ color: 'var(--muted)' }}>Genre musical</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">

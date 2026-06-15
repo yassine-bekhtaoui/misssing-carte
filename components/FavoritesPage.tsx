@@ -15,6 +15,7 @@ interface Artist {
   deezer_artist_image?: string
   deezer_preview_url?: string
   deezer_track_id?: string
+  origins?: string
 }
 export default function FavoritesPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -312,6 +313,9 @@ export default function FavoritesPage() {
                   <h2 className="font-bold truncate" style={{ color: GENRE_COLORS[artist.genre] || 'var(--text)' }}>{artist.name}</h2>
                   <p className="text-sm truncate" style={{ color: 'var(--text)' }}>♪ {artist.song_name}</p>
                   <p className="text-xs mt-1" style={{ color: 'var(--muted)' }}>{artist.country_name} · {artist.genre}</p>
+                  {artist.origins && (
+                    <p className="text-xs mt-1 truncate" style={{ color: 'var(--muted2)' }}>Origines : {artist.origins}</p>
+                  )}
                 </div>
               </div>
               {artist.deezer_preview_url && (

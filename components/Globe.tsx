@@ -27,6 +27,7 @@ interface Artist {
   deezer_preview_url?: string
   reason?: string
   submitted_by?: string
+  origins?: string
 }
 
 interface CountryGroup {
@@ -75,6 +76,7 @@ export default function Globe() {
   const [tooltip,         setTooltip]         = useState<Artist | null>(null)
   const [loading,         setLoading]         = useState(true)
   const [selectedCountry, setSelectedCountry] = useState<CountryGroup | null>(null)
+  const [returnCountry,   setReturnCountry]   = useState<CountryGroup | null>(null)
   const [showGenrePanel,  setShowGenrePanel]  = useState(false)
   const [panelGenre,      setPanelGenre]      = useState<string | null>(null)
   const [user,            setUser]            = useState<User | null>(null)
@@ -95,6 +97,7 @@ export default function Globe() {
           song_name: a.song_name,
           country_code: a.country_code,
           genre: a.genre,
+          origins: a.origins,
           status: a.status,
           reviewed_at: a.reviewed_at,
         })))
@@ -227,6 +230,7 @@ export default function Globe() {
       badge.addEventListener('click', e => {
         e.stopPropagation()
         setTooltip(null)
+        setReturnCountry(null)
         onCountryClickRef.current(group)
       })
 
@@ -289,11 +293,13 @@ export default function Globe() {
           const countryGroup = byCountry.get(artist.country_name)
           if (countryGroup && countryGroup.artists.length > 1) {
             setTooltip(null)
+            setReturnCountry(null)
             setSelectedCountry(countryGroup)
             return
           }
 
           setSelectedCountry(null)
+          setReturnCountry(null)
           setTooltip(artist)
         })
         // ── Labels HTML continents + badges pays ────────────────────────
@@ -362,9 +368,28 @@ export default function Globe() {
 
   const genres = [...new Set(artists.map(a => a.genre))].sort()
 
+  const openArtistFromCountry = (artist: Artist, country: CountryGroup) => {
+    setSelectedCountry(null)
+    setReturnCountry(country)
+    setTooltip(artist)
+  }
+
+  const closeTooltip = () => {
+    setTooltip(null)
+    setReturnCountry(null)
+  }
+
+  const backToCountryList = () => {
+    if (!returnCountry) return
+    setTooltip(null)
+    setSelectedCountry(returnCountry)
+    setReturnCountry(null)
+  }
+
   const flyToArtist = (artist: Artist) => {
     setShowGenrePanel(false)
     setPanelGenre(null)
+    setReturnCountry(null)
     if (globeRef.current) {
       pointOfViewRef.current = { lat: artist.lat, lng: artist.lng, altitude: 0.55 }
       applyGlobeMotionLock(globeRef.current)
@@ -650,7 +675,7 @@ export default function Globe() {
               {selectedCountry.artists.map(a => (
                 <button
                   key={a.id}
-                  onClick={() => { setTooltip(a); setSelectedCountry(null) }}
+                  onClick={() => openArtistFromCountry(a, selectedCountry)}
                   className="tap-target w-full flex items-center gap-3 rounded-xl p-3 transition-all text-left"
                   style={{ background: 'var(--surface2)' }}
                   onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
@@ -680,7 +705,7 @@ export default function Globe() {
       {tooltip && (
         <div className="absolute inset-0 flex items-center justify-center z-[200]"
              style={{ background: 'rgba(8,0,6,0.6)', backdropFilter: 'blur(4px)' }}
-             onClick={() => setTooltip(null)}>
+             onClick={closeTooltip}>
           <div
             className="rounded-2xl p-4 sm:p-5 max-w-sm w-full mx-3 sm:mx-4 shadow-2xl max-h-[calc(100dvh-6rem)] overflow-y-auto"
             style={{
@@ -706,9 +731,20 @@ export default function Globe() {
                 <div className="text-sm mt-1 truncate" style={{ color: 'var(--text)' }}>♪ {tooltip.song_name}</div>
                 <div className="text-xs mt-1" style={{ color: 'var(--muted)' }}>📍 {tooltip.country_name}</div>
               </div>
-              <button onClick={() => setTooltip(null)} className="tap-target w-11 h-11 rounded-full leading-none hover:opacity-60 transition-opacity flex-shrink-0 flex items-center justify-center"
+              <button onClick={closeTooltip} className="tap-target w-11 h-11 rounded-full leading-none hover:opacity-60 transition-opacity flex-shrink-0 flex items-center justify-center"
                       style={{ color: 'var(--muted2)', background: 'var(--surface2)' }}>✕</button>
             </div>
+
+            {returnCountry && (
+              <button
+                onClick={backToCountryList}
+                className="tap-target w-full mb-3 rounded-xl px-4 py-3 text-sm font-bold transition-all text-left"
+                style={{ background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' }}
+                type="button"
+              >
+                ← Retour à {returnCountry.name}
+              </button>
+            )}
 
             {/* Genre tag */}
             <div className="mb-3">
@@ -717,6 +753,12 @@ export default function Globe() {
                 🎵 {tooltip.genre}
               </span>
             </div>
+
+            {tooltip.origins && (
+              <p className="text-sm mb-3" style={{ color: 'var(--muted)' }}>
+                Origines : <span style={{ color: 'var(--text)' }}>{tooltip.origins}</span>
+              </p>
+            )}
 
             <button
               onClick={() => toggleFavorite(tooltip)}

@@ -13,6 +13,7 @@ interface Artist {
   deezer_preview_url?: string
   reason?: string
   submitted_by?: string
+  origins?: string
   submitted_at: string
   status: string
 }
@@ -251,6 +252,11 @@ function ArtistCard({ artist, mode, actionLoading, onApprove, onReject, onDelete
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--surface2)', color: 'var(--muted)' }}>
               📍 {artist.country_name}
             </span>
+            {artist.origins && (
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--surface2)', color: 'var(--muted)' }}>
+                Origines : {artist.origins}
+              </span>
+            )}
             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--surface2)', color: 'var(--muted2)' }}>
               {date}
             </span>

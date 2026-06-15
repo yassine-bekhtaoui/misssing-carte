@@ -32,7 +32,7 @@ async function refreshPreviewUrl(artist: ArtistRow) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { artistName, deezerArtistId, deezerArtistImage, songName, deezerTrackId, deezerPreviewUrl, countryCode, genre, reason, submittedBy } = body
+    const { artistName, deezerArtistId, deezerArtistImage, songName, deezerTrackId, deezerPreviewUrl, countryCode, origins, genre, reason, submittedBy } = body
 
     if (!artistName || !songName || !countryCode || !genre) {
       return NextResponse.json({ error: 'Champs manquants' }, { status: 400 })
@@ -60,11 +60,22 @@ export async function POST(req: NextRequest) {
 
     let { error } = await supabaseAdmin().from('artists').insert({
       ...baseData,
+      origins: origins || null,
       reason: reason || null,
       submitted_by: submittedBy || null,
     })
 
-    // Si les colonnes reason/submitted_by n'existent pas encore, on réessaie sans
+    // Si la colonne origins n'existe pas encore, on garde les autres champs optionnels.
+    if (error && (error.code === '42703' || error.message?.includes('column'))) {
+      const result = await supabaseAdmin().from('artists').insert({
+        ...baseData,
+        reason: reason || null,
+        submitted_by: submittedBy || null,
+      })
+      error = result.error
+    }
+
+    // Si les colonnes reason/submitted_by n'existent pas encore, on reessaie sans.
     if (error && (error.code === '42703' || error.message?.includes('column'))) {
       const result = await supabaseAdmin().from('artists').insert(baseData)
       error = result.error
